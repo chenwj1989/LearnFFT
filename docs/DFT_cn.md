@@ -13,28 +13,30 @@
 
 # DFT的代码实现
 DFT变换和逆变换的公式如下
-$$\begin{align}
+$$
+\begin{aligned}
 DFT: X[k] & = \sum_{n=0}^{N-1} x[n] e^{-2\pi \frac{k}{N}n} \\
 IDFT: x[n] & = \frac{1}{N}\sum_{n=0}^{N-1} X[k] e^{2\pi \frac{k}{N}n} 
-\end{align}$$
+\end{aligned}
+$$
 
 其中时域信号$x[n]$和频域信号$X[k]$都是复数信号。因为计算机的算数运算都是实数运算，复数运算需要额外的库支持，所以我们可以将DFT公式展开成实数运算。首先使用欧拉公式展开复指数：
-$$\begin{align}
+$$\begin{aligned}
 X[k] & = \sum_{n=0}^{N-1} x[n] e^{-2\pi \frac{k}{N}n} \\
      & = \sum_{n=0}^{N-1} x[n] \left[ \cos(2\pi \frac{k}{N}n) - j\sin(2\pi \frac{k}{N}n)\right] \\
      & = \sum_{n=0}^{N-1} \left( x_r[n] + jx_i[n]\right) \left[ \cos(2\pi \frac{k}{N}n) - j\sin(2\pi \frac{k}{N}n)\right] 
-\end{align}$$
+\end{aligned}$$
 
 然后分解实部和虚部，我们就得到了DFT和IDFT实部和虚部计算的四条公式：
-$$\begin{align}
+$$\begin{aligned}
 X_r[k] & = \sum_{n=0}^{N-1} \left[ x_r[n]\cos(2\pi \frac{k}{N}n) + x_i[n]\sin(2\pi \frac{k}{N}n)\right] \\
 X_i[k] & = \sum_{n=0}^{N-1} \left[-x_r[n]\sin(2\pi \frac{k}{N}n) + x_i[n]\cos(2\pi \frac{k}{N}n)\right] \\
-\end{align}$$
+\end{aligned}$$
 
-$$\begin{align}
+$$\begin{aligned}
 x_r[n] & = \frac{1}{N}\sum_{n=0}^{N-1} \left[ X_r[k]\cos(2\pi \frac{k}{N}n) - X_r[k]\sin(2\pi \frac{k}{N}n)\right] \\
 x_i[n] & = \frac{1}{N}\sum_{n=0}^{N-1} \left[X_r[k]\sin(2\pi \frac{k}{N}n) + X_r[k]\cos(2\pi \frac{k}{N}n)\right] \\
-\end{align}$$
+\end{aligned}$$
 
 为了减少每次进行DF计算的时间，我们可以使用空间换时间。在DFT类初始化时，给定DFT的size，并且预创建三角函数表$t\_cos[k][n] = \cos(2\pi \frac{k}{N}n)$ 和$t\_sin[k][n] = \sin(2\pi \frac{k}{N}n)$, 后续每次计算DFT时查表即可。
 
@@ -50,12 +52,12 @@ x_i[n] & = \frac{1}{N}\sum_{n=0}^{N-1} \left[X_r[k]\sin(2\pi \frac{k}{N}n) + X_r
     }
 ```
 最后，我们通过下面四条公式即可实现基础的DFT变化和逆变换。
-$$\begin{align}
+$$\begin{aligned}
 X_r[k] & = \sum_{n=0}^{N-1} \left( x_r[n]*t\_cos[k][n] + x_i[n]*t\_sin[k][n]\right) \\
 X_i[k] & = \sum_{n=0}^{N-1} \left(-x_r[n]*t\_sin[k][n] + x_i[n]*t\_cos[k][n]\right) \\
 x_r[n] & = \frac{1}{N}\sum_{n=0}^{N-1} \left( X_r[k]*t\_cos[k][n] - X_i[k]*t\_sin[k][n]\right) \\
 x_i[n] & = \frac{1}{N}\sum_{n=0}^{N-1} \left(X_r[k]*t\_sin[k][n] + X_i[k]*t\_cos[k][n]\right) \\
-\end{align}$$
+\end{aligned}$$
 
 ```cpp
 void DFT::Forward(const double* real_in, const double* imag_in, double* real_out, double* imag_out) {
@@ -112,12 +114,13 @@ void DFT::Inverse(const double* real_in, const double* imag_in, double* real_out
     end_time = clock();
 ```
 
-
 ```cpp
     start_time = clock();
     my_dft.ForwardReal(in_real, out_real, out_imag);
     end_time = clock();
+ ```
 
+```cpp
     start_time = clock();
     kiss_fftr(forward_fft, in_real, out_cpx);
     end_time = clock();
@@ -138,3 +141,4 @@ void DFT::Inverse(const double* real_in, const double* imag_in, double* real_out
 - Proakis, John G. Digital signal processing: principles algorithms and applications. Pearson Education India, 2001.
 - [Mathematics of the Discrete Fourier Transform (DFT), with Audio Applications --- Second Edition, by Julius O. Smith III, W3K Publishing, 2007](https://ccrma.stanford.edu/~jos/mdft/mdft.html)
 - [從傅立葉轉換到數位訊號處理](https://alan23273850.gitbook.io/signals-and-systems)
+- [KISSFFT, by Mark Borgerding](https://github.com/mborgerding/kissfft)
