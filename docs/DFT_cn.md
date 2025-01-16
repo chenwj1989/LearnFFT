@@ -13,6 +13,7 @@
 
 # DFT的代码实现
 DFT变换和逆变换的公式如下
+
 $$
 \begin{aligned}
 DFT: X[k] & = \sum_{n=0}^{N-1} x[n] e^{-2\pi \frac{k}{N}n} \\
@@ -21,6 +22,7 @@ IDFT: x[n] & = \frac{1}{N}\sum_{n=0}^{N-1} X[k] e^{2\pi \frac{k}{N}n}
 $$
 
 其中时域信号$x[n]$和频域信号$X[k]$都是复数信号。因为计算机的算数运算都是实数运算，复数运算需要额外的库支持，所以我们可以将DFT公式展开成实数运算。首先使用欧拉公式展开复指数：
+
 $$\begin{aligned}
 X[k] & = \sum_{n=0}^{N-1} x[n] e^{-2\pi \frac{k}{N}n} \\
      & = \sum_{n=0}^{N-1} x[n] \left[ \cos(2\pi \frac{k}{N}n) - j\sin(2\pi \frac{k}{N}n)\right] \\
@@ -28,6 +30,7 @@ X[k] & = \sum_{n=0}^{N-1} x[n] e^{-2\pi \frac{k}{N}n} \\
 \end{aligned}$$
 
 然后分解实部和虚部，我们就得到了DFT和IDFT实部和虚部计算的四条公式：
+
 $$\begin{aligned}
 X_r[k] & = \sum_{n=0}^{N-1} \left[ x_r[n]\cos(2\pi \frac{k}{N}n) + x_i[n]\sin(2\pi \frac{k}{N}n)\right] \\
 X_i[k] & = \sum_{n=0}^{N-1} \left[-x_r[n]\sin(2\pi \frac{k}{N}n) + x_i[n]\cos(2\pi \frac{k}{N}n)\right] \\
@@ -52,6 +55,7 @@ x_i[n] & = \frac{1}{N}\sum_{n=0}^{N-1} \left[X_r[k]\sin(2\pi \frac{k}{N}n) + X_r
     }
 ```
 最后，我们通过下面四条公式即可实现基础的DFT变化和逆变换。
+
 $$\begin{aligned}
 X_r[k] & = \sum_{n=0}^{N-1} \left( x_r[n]*t\_cos[k][n] + x_i[n]*t\_sin[k][n]\right) \\
 X_i[k] & = \sum_{n=0}^{N-1} \left(-x_r[n]*t\_sin[k][n] + x_i[n]*t\_cos[k][n]\right) \\
