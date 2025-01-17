@@ -1,28 +1,32 @@
-DFT是离散傅里叶变换，是一种适合计算机实现的傅里叶变换形式。这个仓库的目标是学习如何实现DFT，并逐步优化。在开始学习怎么使用代码实现DFT之前，我们需要快速理解傅里叶变换和离散傅里叶变换的背景知识。
+ The Discrete Fourier Transform (DFT) is a form of Fourier Transform suitable for computers. The goal of this repository is to learn how to implement DFT, optimize it step by step. 
+ 
+ Before we start coding, some understand the background knowledge of the Fourier Transform and the Discrete Fourier Transform should be introduced.
 
-# 什么是傅里叶变换?
+# What's the Fourier Transform?
 
-人类对物理世界的信号进行观察、测量，最直接的方式，是记录信号随着时间的变化。这就得到时域信号x(t)，表示时间方向的信号幅度。对信号进行时域分析，有很多数学工具。但是信号的一些特征，可能是非时变的、在时域上并不能直接感知的，数学家/物理学家会将信号转到某种变换域上去分析。
+The most direct way to observe and measure signals in the physical world is to record how the signals change over time. This provides us the time-domain signal x(t), which represents the signal‘s amplitude as it changes over time. There are various methods for analyzing signals in the time domain, but certain signal characteristics may not be readily apparent in the time domain. Mathematicians/physicists might convert signals to a specific transform domain for analysis.
 
-比如，在一场音乐会上录制的音频，有男低音的歌声、女高音的歌声、各种乐器或高或低的演奏声。音频信号在时域上，看起来像是杂乱无章变化的序列，只能看到有时候音量高，有时候音量低。我们如何分辨里面哪些声音是男低音、哪些是女高音、哪些是乐器、各自表演的歌曲是什么？
+For instance, when you document a live performance. Different vocal and instrumental elements, such as bass and soprano singing, along with a variety of musical instruments, can be heard at different pitches. In the time domain, an audio signal looks like a chaotically changing sequence, where you can only see that the volume is sometimes high and sometimes low. How can we distinguish between bass, soprano, and instrumental voices, and identify the songs they are performing?
 
 ![](music_time.png)
 
-我们知道，声波是一种振动，其特征就是两个量：振动频率和振动幅度。振动频率越高的声音，人耳的感受更尖锐，振动频率越低，人耳感受越低沉。成人男性的声带一般较女性的声带更粗更宽，声带震动慢，因此一般男声更低沉、女声更高亢。而不同的乐器有不同的共振频率和谐波，比如琴弦越短，声音越高。如果我们把音乐的声波信号包含了哪些振动频率找出来，我们就能分析这首音乐包含了哪些乐器和演唱者、是在演奏什么歌曲了。如下图。
+Sound waves are a type of vibration that is defined by two factors: frequency of vibration and amplitude of vibration. As the frequency of vibration increases, the human ear perceives sharper sounds, while lower frequencies are felt as deeper tones. 
+
+Adult males typically have thicker and wider vocal cords compared to females, resulting in slower vibration and deeper voices for males, and higher voices for females. Various musical instruments resonate at unique frequencies and harmonics. By determining the vibration frequencies present in the music's sound wave signal, we can identify the instruments, singers, and song playing. As show in he image blow, the peaks on the spectrum highlight the specific frequencies of the music being played at that moment.
 
 ![](music_freq.png)
 
-傅里叶变换就是这样一种数学工具，可以将信号变换到频域上，进行频率分析。通过傅里叶变换，我们将时域中的（幅度，时间）变换到频域中的（幅度，频率）进行分析和处理。
+The Fourier transform is a mathematical tool that converts signals from the time domain (amplitude, time) to the frequency domain (amplitude, frequency) for analysis and processing.
 
-这个变换是怎么实现的呢？我们回头看上面的音乐信号，将其中一段放大，可以看到一些相似波形在重复出现，而大波形里又叠加了一些小波形。看起来杂乱无章变化的时域序列，并不是真的杂乱无章，其实可以分解为不同周期信号的叠加。周期越长，就是频率越低，周期越短，就是频率越高。
+How can this transformation be accomplished? Let's revisit the music signal above and zoom in a certain section. We notice that certain waveforms are repeated, with smaller waveforms overlaid on the larger ones. The time domain sequence that appears to vary randomly is actually not random. It can be broken down into a combination of signals with varying period of time. Frequency decreases as the period lengthens and increases as the period shortens.
 
 ![](music_time_zoom.png)
 
-将一个时域信号，分解为不同频率的周期信号的线性叠加，这就是傅里叶变换的基础出发点。
+Decomposing a time-domain signal into a linear superposition of periodic signals of different frequencies is the fundamental concept behind the Fourier transform.
 
-## 连续时间傅里叶级数FS
+## Fourier Series (FS)
 
-周期信号的基本数学表示是傅里叶级数，也就是一个周期函数可以被分解成无限个三角函数sine和cosine的线性叠加。以下图为例，一个矩形波，可以分解成一个大的正弦波再叠加一系列小的正弦波。
+The Fourier series offers a way to break down a periodic function into a combination of sine and cosine functions. Using the figure presented as a reference, a rectangular wave can be decomposed into a major sine wave which is then combined with multiple smaller sine waves.
 
 ![](Fourier_series_and_transform.gif)
 
@@ -233,7 +237,7 @@ X_3 = X_5^* \\
     }
 ```
 
-而逆变换中，我们需要频域的实部和虚部，计算出时域的实部。
+In the inverse transform, we need to use the real and imaginary parts in the frequency domain to calculate the real part in the time domain.
 
 ```cpp
     void DFT::InverseReal(const double* real_in, const double* imag_in, double* real_out)
@@ -256,13 +260,13 @@ X_3 = X_5^* \\
     }
 ```
 
-# DFT性能测试
+# DFT Performance Test
 
-现在我们来验证一下DFT实现的正确性和计算性能。首先，我们选择一种常用的开源FFT软件[KISSFFT](https://github.com/mborgerding/kissfft)作为对比方案。我们记录几个值
+Now let's verify the correctness and computational performance of the DFT implementation. First, we choose a commonly used open source FFT software[KISSFFT](https://github.com/mborgerding/kissfft) as a baseline to compare。These values would be recorded:
 
-- 对比KISS和my_dft跑一轮变换的时间。
-- 计算my_dft和KISS同一输入的输出结果之间的误差。
-- 计算my_dft先运行DFT，然后对结果作IDFT，恢复的结果与原信号之间的误差。
+- Runtime per pass of my DFT and KISS.
+- The error between the output of my_dft and KISS for the same input.。
+- Run my_dft with DFT forward, and then IDFT to recover the signal., then performs the IDFT on the result. Recored the error between the recovered result and the original signal.
 
 ```cpp
     start_time = clock();
@@ -276,7 +280,7 @@ X_3 = X_5^* \\
     end_time = clock();
 ```
 
-对实序列DFT，作同样的对比
+The same comparison is made for real sequence DFT.
 
 ```cpp
     start_time = clock();
@@ -290,7 +294,7 @@ X_3 = X_5^* \\
     end_time = clock();
 ```
 
-以1024点double类型随机数作输入，DFT性能测试结果如下：
+Using 1024-point random double as input, the DFT performance test results are as follows:
 
 |        | KissFFT |  my DFT  | KissFFTR| my DFT Real |
 | :-----:|  :----: | :----:| :----: | :----: |
@@ -298,9 +302,9 @@ X_3 = X_5^* \\
 | Forward-Inverse Error |  1.208e-16  | 5.267e-14 | 1.213e-16 | 3.368e-14 |
 | DFT-KissFFT Differene |    | 1.196e-12 |  | 2.122e-13 |
 
-到这里，我们就使用C++实现了一个基础的DFT，可以在程序中实际运行且验证了计算的正确性。但是其计算复杂度是$O(log N^2)$,计算性能离可商用距离还比较遥远。
+So far, we have implemented a basic DFT using C++, which can actually run in a program. The correctness of the calculation was also vierified. However, its computational complexity is $O(log N^2)$, and the computational performance is still far from commercial use.
 
-因此，我们需要引入DFT的计算优化，也就是下一步要讨论的快速傅里叶变换（FFT）。
+Therefore, we need to introduce DFT computational optimization, which is the fast Fourier transform (FFT) to be discussed next.
 
 # 参考资料
 - Oppenheim, Willsky, Nawab - Signals & Systems [2nd Edition]
