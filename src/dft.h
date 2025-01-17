@@ -26,13 +26,12 @@ namespace learnfft
         const size_t m_bins;
         std::vector<std::vector<T>> m_sin;
         std::vector<std::vector<T>> m_cos;
-        std::vector<std::vector<T>> m_tmp;
     };
 
     template <typename T>
     DFT<T>::DFT(size_t size)
         : m_size(size), m_bins(size / 2 + 1), m_sin(size, std::vector<T>(size)),
-          m_cos(size, std::vector<T>(size)), m_tmp(size, std::vector<T>(size))
+          m_cos(size, std::vector<T>(size))
     {
         for (int i = 0; i < m_size; ++i)
         {
@@ -92,23 +91,19 @@ namespace learnfft
 
     template <typename T> void DFT<T>::InverseReal(const T* real_in, const T* imag_in, T* real_out)
     {
-        for (int i = 0; i < m_bins; ++i)
-        {
-            m_tmp[0][i] = real_in[i];
-            m_tmp[1][i] = imag_in[i];
-        }
-        for (int i = m_bins; i < m_size; ++i)
-        {
-            m_tmp[0][i] = real_in[m_size - i];
-            m_tmp[1][i] = -imag_in[m_size - i];
-        }
         for (int i = 0; i < m_size; ++i)
         {
             T re = 0.0;
-            for (int j = 0; j < m_size; ++j)
-                re += m_tmp[0][j] * m_cos[i][j];
-            for (int j = 0; j < m_size; ++j)
-                re -= m_tmp[1][j] * m_sin[i][j];
+            for (int j = 0; j < m_bins; ++j)
+                re += real_in[j] * m_cos[i][j];
+            for (int j = m_bins; j < m_size; ++j)
+                re += real_in[m_size - j] * m_cos[i][j];
+
+            for (int j = 0; j < m_bins; ++j)
+                re -= imag_in[j] * m_sin[i][j];
+            for (int j = m_bins; j < m_size; ++j)
+                re -= -imag_in[m_size - j] * m_sin[i][j];
+
             real_out[i] = re;
         }
     }
