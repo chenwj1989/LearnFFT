@@ -32,108 +32,118 @@ The Fourier series offers a way to break down a periodic function into a combina
 
 *[Fourier transform time and frequency domains (small).gif, CC0, By Lucas Vieira](https://commons.wikimedia.org/w/index.php?curid=28399050)*
 
-傅里叶级数利用了三角函数的周期性和正交性，将周期信号变换为三角函数正交基的权重。实数形式如下：
+The Fourier series utilizes frequency-multiplying trigonometric functions as a set of orthogonal basis, and transforms a periodic signal into coefficients of these orthogonal basis.
+
+Heere is the real number form of the Fourier Series, where $T_0$ is the period in the time domain and $f_0 = 1/T_0$.
 
 $$\begin{aligned}
-f(t) & = \frac{a_0}{2}+\sum_{n=0}^{\infty} \left[a_n\cos(nt)+b_n\sin(nt)\right] \\
+f(t) & = \frac{a_0}{2}+\sum_{n=0}^{\infty} \left[a_n\cos(2\pi nf_0t)+b_n\sin(2\pi nf_0t)\right] \\
 其中 \\
-a_0 & = \frac{1}{\pi}\int_{-\pi}^{\pi} f(t)dt \\
-a_n & = \frac{1}{\pi}\int_{-\pi}^{\pi} f(t)\cos(nt)dt \\
-b_n & = \frac{1}{\pi}\int_{-\pi}^{\pi} f(t)\sin(nt)dt \\
+a_0 & = \frac{1}{T_0}\int_{-T/2}^{T/2} f(t)dt \\
+a_n & = \frac{2}{T_0}\int_{-T/2}^{T/2} f(t)\cos(2\pi nf_0t)dt \\
+b_n & = \frac{2}{T_0}\int_{-T/2}^{T/2} f(t)\sin(2\pi nf_0t)dt \\
 \end{aligned}$$
 
-复数形式的傅里叶级数形式如下，其中 $T_0$ 是时域周期，$f_0 = 1/T_0$。
+The complex number form is as follows:
 
 $$\begin{aligned}
 X(kf_0) & = \frac{1}{T_0}\int_{T0} x(t) e^{-j2\pi kf_0t}dt \\
 x(t) & = \sum_{k=-\infty}^{\infty} X(kf_0)e^{j2\pi kf_0t} 
 \end{aligned}$$
 
-## 连续时间傅里叶变换CTFT
+## Continuous Time Fourier Transform (CTFT)
 
-对于非周期信号，不能直接用傅里叶级数，但可认为这是一种特殊的周期函数，其周期趋近于无穷。这个条件下，傅里叶级数可以推导为傅里叶积分，得到的是一个频谱密度函数。
+Non-periodic signals cannot be directly analyzed using the Fourier Series. However, a non-periodic signal can be seen as a unique periodic function as its period approaches infinity. Under this condition, the Fourier series can be derived as the Fourier integral, and the result is a spectral density function.
 
 $$\begin{aligned}
 X(f) & = \lim_{T_0->\infty} \frac{1}{T_0}\int_{T0} x(t) e^{-j2\pi kf_0t}dt 
 \end{aligned}$$
 
-傅里叶积分可用来分析非周期连续信号的频谱密度，也可以用频谱密度恢复时域信号。这就是连续时间傅里叶变换CTFT。
+The Fourier integral can be used to analyze the spectral density of non-periodic continuous signals, and the spectral density can also be used to restore the time domain signal. This is the continuous-time Fourier transform (CTFT).
 
 $$\begin{aligned}
 X(f) & = \int_{t=-\infty}^{\infty} x(t) e^{-j2\pi ft}dt \\
 x(t) & = \int_{k=-\infty}^{\infty} X(f)e^{j2\pi ft}df 
 \end{aligned}$$
 
-# 什么是DFT?
-针对物理世界的连续信号，我们有连续时间傅里叶变换作为数学工具。但是电子计算机使用二进制器件进行计算、且只有固定的内存空间，故只能处理数字化的信号，也就是有限长的、离散化的、量化的信号。
+# What is the Discrete Fourier Transform (DFT)?
 
-而离散傅里叶变换（DFT）就是为数字世界设计的，一种时域信号离散且有限长、频域信号离散且有限长的变换。
+The CTFT is a useful technique for analyzing continuous signal in the real world. In the digital world, computers rely on binary calculations and have limited memory capacity, meaning that only digitized signals are compatible. Digitized signals refer to signals that are finite, discrete in time, and quantized in vlaue.
 
-## 时域离散化：离散时间傅里叶变换DTFT
+The Discrete Fourier Transform (DFT) is designed for the digital world. It is a transform that applies finite and discrte time signals, and generates discrete and finite signals int the frequency domain.
 
-首先，我们对连续信号时域上作离散化，按 $T_s$ 周期采样, 也就是将原信号乘以一个冲击串函数: $x(t)\delta(t-nT_s)$。
+## Discretization in Time: Discrete Time Fourier Transform (DTFT)
+
+First, let's do discretization in the time domain: sampling signals with a period $T_s$. That's equivalent to multiplying the original signal with a impluse train $x(t)\delta(t-nT_s)$.
 
 ![](impulse_train_sampling.png)
 
-将 $x(t)\delta(t-nT_s)$ 带入傅里叶变换公式，我们就得到一个周期采样的傅里叶变换。
+Apply Fourier transformto the new signal $x(t)\delta(t-nT_s)$:
 
 $$\begin{aligned}
 X(f) & = \int_{t=-\infty}^{\infty} x(t)\delta(t-nT_s) e^{-j2\pi ft}dt \\
       & = \sum_{k=-\infty}^{\infty} x(nTs) e^{-j2\pi f(nTs)}
 \end{aligned}$$
 
-根据傅里叶变换的性质，时域上乘以一个冲击串，相当于频域卷积一个冲击串的傅里叶变换，冲击串的傅里叶变换也是一个冲击串。《信号与系统》教材里说明了，这个结果，就是频域上以 $f_s = T_s$ 为周期重复。
+According to the properties of Fourier transform, multiplying by an impulse train in the time domain is equivalent to convolving the Fourier transform of an impulse string in the frequency domain. The figures in the textbook *Signals and Systems* shows that convoling an impluse train means a periodic extention. The spectrum shifts and repeats with period  $f_s = T_s$.
 
 ![](impulse_train_convolution.png)
 
-所以时域周期 $T_s$ 采样后的频谱，周期为 $f_s$ 的周期函数，以 $\omega = 2\pi f / f_s$ 归一化频率，我们可以得到归一化频率的离散时间傅里叶变换DTFT公式。
+By sampling in time with period $T_s$, the spectrum is periodic with period $f_s$. The DTFT formula of normalized frequency ($\omega = 2\pi f / f_s$) is as below.
 
 $$\begin{aligned}
 X(\omega) & = \sum_{k=-\infty}^{\infty} x[n] e^{-j\omega n} \\
 x[n] & = \frac{1}{2\pi}\int_{-\pi}^{\pi} X(\omega)e^{j\omega n} d\omega 
 \end{aligned}$$
 
-因为频谱被周期延拓了，实际的有效频谱只在一个周期内（通常取 $-\pi$ 到 $\pi$ ），也就是使用 $-\pi$ 到 $\pi$ 内的频谱作逆变换，即可恢复时域信号。所以DTFT逆变换的积分上下界取的是 $-\pi$ 到 $\pi$。
+Since the spetrum is periodically extended, information is useful only in one period (normally $-\pi$ to $\pi$ ). The time-domain signal can be recovered by an inverse transform using spectrum between $-\pi$ and $\pi$. So the integral upper and lower bounds of the inverse DTFT transform are $-\pi$ and $\pi$.
 
-## 频域离散化：离散傅里叶变换DFT
+## Discretization in Frequency: Discrete Fourier Transform (DFT)
 
-DTFT实现了时域的离散化。类似地，我们可以在此基础上实现频域的离散化，也就是对频域进行采样。假设在DTFT的频域上按照 $\omega_k$ 采样, 则时域信号按照 $2\pi/\omega_k$ 周期延拓，于是我们就得到了一对离散信号和他们之间的变换与逆变换，这就是离散傅里叶变换DFT。
+The DTFT achieves the discretization of time domain. In the same way, we can achieve frequency domain discretization on the DTFT result by sampling the spectrum. 
+
+When we sample the DTFT spectrum every $\omega_k$, series in time periodically extends with period $2\pi/\omega_k$. Thereupon a pair of discrete signals and transformations between them are achieved. That is the Discrete Fourier Transform (DFT).
 
 $$\begin{aligned}
 DFT: X[k] & = \sum_{n=0}^{N-1} x[n] e^{-2\pi \frac{k}{N}n} \\
 IDFT: x[n] & = \frac{1}{N}\sum_{n=0}^{N-1} X[k] e^{2\pi \frac{k}{N}n} 
 \end{aligned}$$
 
-所以从CTFT到DFT，我们经过几个步骤
-- 时域上按 $T_s$ 周期采样（频域上成为周期为 $f_s = 1/T_s$ 的周期频谱）
-- 时域信号截短成为有限长信号，并作周期 $T_k$ 延拓（也就是频域离散化，采样间隔 $\omega_k = 2 \pi/T_k$ ）
-- 取时域上一个周期、频域上一个周期的序列作为离散傅里叶变化的输入和输出。
+In summary, the DFT is derived from the CTFT following these steps:
+- Sampling in time wihe period $T_s$. (periodical extention in spectrum withe period $f_s = 1/T_s$ )
+- Truncation and periodical extention in time with finite length T_k. (discretization in frequency with sampling period $\omega_k = 2 \pi/T_k$ )
+- USe one period in time as the DFT input, and one period in spectrum as the DFT result.
 
-可以对比一下以上几种变换的性质：
+Here is a brief summary of the above transformations:
 
-|变换 |	时间	|频率|
+|Transformation |	Time	| Frequency |
 |:-----:|  :----: | :----:| 
-|傅里叶级数|	连续，周期性	|离散，非周期性|
-|连续时间傅里叶变换|	连续，非周期性	|连续，非周期性|
-|离散时间傅里叶变换	|离散，非周期性	|连续，周期性|
-|离散傅里叶变换	|离散，周期性|	离散，周期性|
+|Fourier Series|	continuous, periodic	| discrete, non-periodic |
+|
+Continuous Time Fourier Transform |	continuous, non-periodic	| continuous, non-periodic|
+|Discrete Time Fourier Transform |discrete, non-periodic	| continuous, periodic|
+|Discrete Fourier Transform	|discrete, periodic|	discrete, periodic|
 
-有了DFT，我们就可以对现实世界的信号进行频率分析啦，而且可以使用数学或软件的手段进行计算加速，成为一种高效的数字信号处理工具。从而衍生出各式各样的数字信号处理的应用，DSP应用主要是围绕这三个阶段：
-- Analysis 分析：从时域到频域的信号变换，如语音到语谱。
-- Filtering 滤波：频域上的操作，如高通、低通、均衡。
-- Synthesis 合成：从频域到时域的逆变换，如从语谱合成语音。
+DFT enables digital systems to analyze the frequencies of real-world signals. Various mathematical and software techniques can be utilized to speed up calculations, turning it into a highly effective tool for digital signal processing. This has resulted in a range of digital signal processing applications, particularly focused on these three stages:
 
-要注意DFT是CTFT的离散化，是对真实连续信号的一种数学近似，从而可以在数字系统中落地。数字系统的离散化、量化是有代价的。时域和频域的采样、截短会带来频谱混叠和频谱泄漏，使用不同精度的数值类型进行运算也会带来不同的量化误差。这些误差的大小就是衡量数字系统的精密程度的指标，是我们工程实现中要时刻考虑的。
+- Analysis: transformation form time domain to frequency domain，like audio to spectogram.
+- Filtering: procesing on spectrum, like low-pass, high-pass, euqalization.
+- Synthesis: transformation form frequency domain to time domain，like syntheizing speech from spectrogram.
 
-# DFT的代码实现
-从前面的背景知识，我们已经得到N点的DFT变换和逆变换的公式如下，后面就是怎么用代码实现DFT了。
+It should be noted that DFT is the discretization of CTFT, which is a mathematical approximation to be deployed in digital systems. The discretization and quantization of digital systems come at a cost. 
+
+Sampling and truncation in the time domain and frequency domain will cause spectrum aliasing and spectrum leakage, and the numerical precision for calculations will also cause quantization errors. The amount of these errors is an indicator of the precision of the digital system, which must be considered at all times durin engineering.
+
+# Programming of the DFT 
+
+Based on the information provided, we have derived the formulas for the DFT and inverse DFT. The next step is how to implement DFT using a programming language.
 
 $$\begin{aligned}
 DFT: X[k] & = \sum_{n=0}^{N-1} x[n] e^{-2\pi \frac{k}{N}n} \\
 IDFT: x[n] & = \frac{1}{N}\sum_{n=0}^{N-1} X[k] e^{2\pi \frac{k}{N}n} 
 \end{aligned}$$
 
-上式中时域信号$x[n]$和频域信号$X[k]$都是复数信号。因为计算机的算数运算都是实数运算，复数运算需要额外的库支持，我们可以将DFT公式展开成实数运算。首先使用欧拉公式展开复指数：
+The signal $x[n]$ in time and $X[k]$ in frequency are complex-valued signals. Since computer arithmetic operations operate on  real numbers, we can modify the DFT formula to use real number operations. The signals and complex exponentials in the DFT and IDFT can be expanded to real and imaginary parts using Euler's formula.
 
 $$\begin{aligned}
 X[k] & = \sum_{n=0}^{N-1} x[n] e^{-2\pi \frac{k}{N}n} \\
@@ -141,7 +151,7 @@ X[k] & = \sum_{n=0}^{N-1} x[n] e^{-2\pi \frac{k}{N}n} \\
      & = \sum_{n=0}^{N-1} \left( x_r[n] + jx_i[n]\right) \left[ \cos(2\pi \frac{k}{N}n) - j\sin(2\pi \frac{k}{N}n)\right] 
 \end{aligned}$$
 
-然后分解实部和虚部，我们就得到了DFT和IDFT实部和虚部计算的四条公式：
+Separate the real and imaginary parts for DFT and IDFT:
 
 $$\begin{aligned}
 X_r[k] & = \sum_{n=0}^{N-1} \left[ x_r[n]\cos(2\pi \frac{k}{N}n) + x_i[n]\sin(2\pi \frac{k}{N}n)\right] \\
@@ -153,7 +163,7 @@ x_r[n] & = \frac{1}{N}\sum_{n=0}^{N-1} \left[ X_r[k]\cos(2\pi \frac{k}{N}n) - X_
 x_i[n] & = \frac{1}{N}\sum_{n=0}^{N-1} \left[X_r[k]\sin(2\pi \frac{k}{N}n) + X_r[k]\cos(2\pi \frac{k}{N}n)\right] \\
 \end{aligned}$$
 
-为了减少每次进行DF计算的时间，我们可以使用空间换时间。在DFT类初始化时，给定DFT的size，并且预创建三角函数表 $t\_cos[k][n] = \cos(2\pi \frac{k}{N}n)$ 和 $t\_sin[k][n] = \sin(2\pi \frac{k}{N}n)$, 后续每次计算DFT时查表即可。
+Here let's use time-space tradeoff to reduce calculation time. When initilizing a DFT class, a sine and a cosine lookup table could be setup for the given size N : $t\_cos[k][n] = \cos(2\pi \frac{k}{N}n)$ and $t\_sin[k][n] = \sin(2\pi \frac{k}{N}n)$. The DFT kernel program would look up the sine and cosine values.
 
 ```cpp
     for (int i = 0; i < m_size; ++i)
@@ -166,7 +176,7 @@ x_i[n] & = \frac{1}{N}\sum_{n=0}^{N-1} \left[X_r[k]\sin(2\pi \frac{k}{N}n) + X_r
         }
     }
 ```
-最后，我们通过下面四条公式即可实现基础的DFT变化和逆变换。
+Finally, we can implement a basic DFT and inverse DFT program the following four formulas.
 
 $$\begin{aligned}
 X_r[k] & = \sum_{n=0}^{N-1} \left( x_r[n]*t\_cos[k][n] + x_i[n]*t\_sin[k][n]\right) \\
@@ -175,7 +185,7 @@ x_r[n] & = \frac{1}{N}\sum_{n=0}^{N-1} \left( X_r[k]*t\_cos[k][n] - X_i[k]*t\_si
 x_i[n] & = \frac{1}{N}\sum_{n=0}^{N-1} \left(X_r[k]*t\_sin[k][n] + X_i[k]*t\_cos[k][n]\right) \\
 \end{aligned}$$
 
-以下就是按照DFT和IDFT公式实现的C++代码。
+Here is the C++ implementation of DFT and IDFT.
 
 ```cpp
 void DFT::Forward(const double* real_in, const double* imag_in, double* real_out, double* imag_out) {
@@ -194,22 +204,24 @@ void DFT::Inverse(const double* real_in, const double* imag_in, double* real_out
     }
 }
 ```
-# 实数序列DFT
-现实世界采集的信号通常是实数序列，其虚部为零，所以虚部乘法全部可以去掉。于是DFT的公式可以简化如下：
+# Discrete Fourier Transform of a Real Signal
+
+In real-world scenarios, the signals collected typically consist of sequences of real numbers, with zero imaginary components, allowing for the elimination of all imaginary part multiplications. So the DFT formula can be simplified like this:
 
 $$\begin{aligned}
 X_r[k] & = \sum_{n=0}^{N-1} \left[ x_r[n]\cos(2\pi \frac{k}{N}n)\right] \\
 X_i[k] & = \sum_{n=0}^{N-1} \left[-x_r[n]\sin(2\pi \frac{k}{N}n)\right] \\
 \end{aligned}$$
 
-根据cosine和sine函数的对称性，我们可以得到实数序列DFT的共轭对称性：
+The conjugate symmetry of the real-valued DFT is drived form symmetry of cosine and sine functions.
+
 $$\begin{aligned}
 X_r[k] & = X_r[N-k] \\
 X_i[k] & = -X_i[N-k] \\
 X[k] & = X^*[N-k]
 \end{aligned}$$
 
-比如对于8点的DFT，$X_0, X_1, X_2, X_3, X_4, X_5, X_6, X_7$,  有
+For a 8-point real-value DFT, we have $X_0, X_1, X_2, X_3, X_4, X_5, X_6, X_7$, where
 
 $$\begin{aligned}
 X_1 = X_7^* \\
@@ -217,9 +229,10 @@ X_2 = X_6^* \\
 X_3 = X_5^* \\
 \end{aligned}$$
 
-因此我们只要计算 $X_0, X_1, X_2, X_3, X_4$ 既可以，$X_5, X_6, X_7$ 可以从共轭推导出来。对于N点DFT，假设只考虑偶数N， 那我们只要计算前 $N/2 + 1$ 个点即可。
+Therefore, only calculations for $X_0, X_1, X_2, X_3, X_4$ are necessary. $X_5, X_6, X_7$ can be derived using conjugae symmetry. For
+a N-point real-value DFT, the first $N/2 + 1$ points are to calculate if N is even, and the first $N/2$ points are to calculate for odd N.
 
-有了这个性质，对于实数序列DFT, 我们不仅节约了大半计算耗时，还节省接近一半存储空间。
+This property allows us to save half computation time and storage space in a real-valued DFT.
 
 ```cpp
     void DFT::ForwardReal(const double* real_in, double* real_out, double* imag_out)
@@ -306,7 +319,7 @@ So far, we have implemented a basic DFT using C++, which can actually run in a p
 
 Therefore, we need to introduce DFT computational optimization, which is the fast Fourier transform (FFT) to be discussed next.
 
-# 参考资料
+# Reference
 - Oppenheim, Willsky, Nawab - Signals & Systems [2nd Edition]
 - Proakis, John G. Digital signal processing: principles algorithms and applications. Pearson Education India, 2001.
 - [Mathematics of the Discrete Fourier Transform (DFT), with Audio Applications --- Second Edition, by Julius O. Smith III, W3K Publishing, 2007](https://ccrma.stanford.edu/~jos/mdft/mdft.html)
