@@ -38,7 +38,7 @@ Heere is the real number form of the Fourier Series, where $T_0$ is the period i
 
 $$\begin{aligned}
 f(t) & = \frac{a_0}{2}+\sum_{n=0}^{\infty} \left[a_n\cos(2\pi nf_0t)+b_n\sin(2\pi nf_0t)\right] \\
-其中 \\
+where \\
 a_0 & = \frac{1}{T_0}\int_{-T/2}^{T/2} f(t)dt \\
 a_n & = \frac{2}{T_0}\int_{-T/2}^{T/2} f(t)\cos(2\pi nf_0t)dt \\
 b_n & = \frac{2}{T_0}\int_{-T/2}^{T/2} f(t)\sin(2\pi nf_0t)dt \\
