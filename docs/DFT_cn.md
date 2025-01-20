@@ -292,7 +292,7 @@ X_3 = X_5^* \\
     end_time = clock();
 ```
 
-以1024点double类型随机数作输入，DFT性能测试结果如下：
+以1024点double类型随机数作输入，在一台CPU是2.3Ghz Intel Core i9的Macbook pro 上测试 DFT性能结果如下：
 
 |        | KissFFT |  my DFT  | KissFFTR| my DFT Real |
 | :-----:|  :----: | :----:| :----: | :----: |

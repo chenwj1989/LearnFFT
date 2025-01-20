@@ -306,7 +306,7 @@ The same comparison is made for real sequence DFT.
     end_time = clock();
 ```
 
-Using 1024-point random double as input, the DFT performance test results are as follows:
+Using 1024-point random double as input, the DFT performance were tested on a Macbook pro with 2.3Ghz Intel Core i9 CPU.
 
 |        | KissFFT |  my DFT  | KissFFTR| my DFT Real |
 | :-----:|  :----: | :----:| :----: | :----: |
