@@ -116,11 +116,10 @@ In summary, the DFT is derived from the CTFT following these steps:
 
 Here is a brief summary of the above transformations:
 
-|Transformation |	Time	| Frequency |
+|Transformation |	Time| Frequency |
 |:-----:|  :----: | :----:| 
-|Fourier Series|	continuous, periodic	| discrete, non-periodic |
-|
-Continuous Time Fourier Transform |	continuous, non-periodic	| continuous, non-periodic|
+|Fourier Series|continuous, periodic| discrete, non-periodic |
+|Continuous Time Fourier Transform |	continuous, non-periodic	| continuous, non-periodic|
 |Discrete Time Fourier Transform |discrete, non-periodic	| continuous, periodic|
 |Discrete Fourier Transform	|discrete, periodic|	discrete, periodic|
 
@@ -273,7 +272,7 @@ In the inverse transform, we need to use the real and imaginary parts in the fre
     }
 ```
 
-# DFT Performance Test
+# DFT Benchmarking
 
 Now let's verify the correctness and computational performance of the DFT implementation. First, we choose a commonly used open source FFT software[KISSFFT](https://github.com/mborgerding/kissfft) as a baseline to compare。These values would be recorded:
 
