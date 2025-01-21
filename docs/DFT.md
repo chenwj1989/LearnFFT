@@ -82,7 +82,8 @@ Apply Fourier transformto the new signal $x(t)\delta(t-nT_s)$:
 
 $$\begin{aligned}
 X(f) & = \int_{t=-\infty}^{\infty} x(t)\delta(t-nT_s) e^{-j2\pi ft}dt \\
-      & = \sum_{k=-\infty}^{\infty} x(nTs) e^{-j2\pi f(nTs)}
+      & = \sum_{k=-\infty}^{\infty} x(nTs) e^{-j2\pi f(nTs)} \\
+      & = \sum_{k=-\infty}^{\infty} x(nTs) e^{-j2\pi nf/f_s}
 \end{aligned}$$
 
 According to the properties of Fourier transform, multiplying by an impulse train in the time domain is equivalent to convolving the Fourier transform of an impulse string in the frequency domain. The figures in the textbook *Signals and Systems* shows that convoling an impluse train means a periodic extention. The spectrum shifts and repeats with period  $f_s = T_s$.

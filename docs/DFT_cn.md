@@ -77,7 +77,8 @@ x(t) & = \int_{k=-\infty}^{\infty} X(f)e^{j2\pi ft}df
 
 $$\begin{aligned}
 X(f) & = \int_{t=-\infty}^{\infty} x(t)\delta(t-nT_s) e^{-j2\pi ft}dt \\
-      & = \sum_{k=-\infty}^{\infty} x(nTs) e^{-j2\pi f(nTs)}
+      & = \sum_{k=-\infty}^{\infty} x(nTs) e^{-j2\pi f(nTs)} \\
+      & = \sum_{k=-\infty}^{\infty} x(nTs) e^{-j2\pi nf/f_s}
 \end{aligned}$$
 
 根据傅里叶变换的性质，时域上乘以一个冲击串，相当于频域卷积一个冲击串的傅里叶变换，冲击串的傅里叶变换也是一个冲击串。《信号与系统》教材里说明了，这个结果，就是频域上以 $f_s = T_s$ 为周期重复。
