@@ -1,18 +1,18 @@
- The Discrete Fourier Transform (DFT) is a form of Fourier Transform suitable for computers. The goal of this repository is to learn how to implement DFT, optimize it step by step. 
+ The Discrete Fourier Transform (DFT) is a form of Fourier Transform suitable for deployment on computers. The goal of this repository is to learn how to implement DFT, optimize it step by step. 
  
- Before we start coding, some understand the background knowledge of the Fourier Transform and the Discrete Fourier Transform should be introduced.
+ Before we start coding, some background knowledge of the Fourier Transform and the Discrete Fourier Transform should be introduced.
 
 # What's the Fourier Transform?
 
 The most direct way to observe and measure signals in the physical world is to record how the signals change over time. This provides us the time-domain signal x(t), which represents the signal‘s amplitude as it changes over time. There are various methods for analyzing signals in the time domain, but certain signal characteristics may not be readily apparent in the time domain. Mathematicians/physicists might convert signals to a specific transform domain for analysis.
 
-For instance, when you document a live performance. Different vocal and instrumental elements, such as bass and soprano singing, along with a variety of musical instruments, can be heard at different pitches. In the time domain, an audio signal looks like a chaotically changing sequence, where you can only see that the volume is sometimes high and sometimes low. How can we distinguish between bass, soprano, and instrumental voices, and identify the songs they are performing?
+For instance, when you document a live performance, bass and soprano singing, along with a variety of musical instruments are mixed in the recorded audio. In the time domain, an audio signal looks like a chaotically changing sequence, where you can only see that the volume is sometimes high and sometimes low. How can we distinguish between bass/soprano/instruments, and identify the songs they are performing?
 
 ![](music_time.png)
 
-Sound waves are a type of vibration that is defined by two factors: frequency of vibration and amplitude of vibration. As the frequency of vibration increases, the human ear perceives sharper sounds, while lower frequencies are felt as deeper tones. 
+Sound waves are a type of vibration that is defined by two factors: frequency and amplitude of vibration. As the frequency of vibration increases, the human ear perceives sharper sounds, while lower frequencies are felt as deeper tones. 
 
-Adult males typically have thicker and wider vocal cords compared to females, resulting in slower vibration and deeper voices for males, and higher voices for females. Various musical instruments resonate at unique frequencies and harmonics. By determining the vibration frequencies present in the music's sound wave signal, we can identify the instruments, singers, and song playing. As show in he image blow, the peaks on the spectrum highlight the specific frequencies of the music being played at that moment.
+For example, adult males typically have thicker and wider vocal cords compared to females, resulting in slower vibration and deeper voices for males. Different musical instruments resonate at different frequencies and harmonics. By determining the vibration frequencies present in the music's sound wave signal, we can identify the instruments, singers, and the song playing. As shown in he image blow, the peaks on the spectrum highlight the specific frequencies of the music being played at that moment.
 
 ![](music_freq.png)
 
@@ -26,7 +26,7 @@ Decomposing a time-domain signal into a linear superposition of periodic signals
 
 ## Fourier Series (FS)
 
-The Fourier series offers a way to break down a periodic function into a combination of sine and cosine functions. Using the figure presented as a reference, a rectangular wave can be decomposed into a major sine wave which is then combined with multiple smaller sine waves.
+The Fourier series offers a way to break down a periodic function into a combination of sine and cosine functions. The gif below shows how a rectangular wave can be decomposed into a major sine wave and multiple smaller sine waves.
 
 ![](Fourier_series_and_transform.gif)
 
@@ -86,7 +86,7 @@ X(f) & = \int_{t=-\infty}^{\infty} x(t)\delta(t-nT_s) e^{-j2\pi ft}dt \\
       & = \sum_{k=-\infty}^{\infty} x(nTs) e^{-j2\pi nf/f_s}
 \end{aligned}$$
 
-According to the properties of Fourier transform, multiplying by an impulse train in the time domain is equivalent to convolving the Fourier transform of an impulse string in the frequency domain. The figures in the textbook *Signals and Systems* shows that convoling an impluse train means a periodic extention. The spectrum shifts and repeats with period  $f_s = T_s$.
+According to the properties of Fourier transform, multiplying by an impulse train in the time domain is equivalent to convolving an impulse train in the frequency domain. The figures in the textbook *Signals and Systems* shows that convoling an impluse train means a periodic extention. The spectrum shifts and repeats with period  $f_s = T_s$.
 
 ![](impulse_train_convolution.png)
 
