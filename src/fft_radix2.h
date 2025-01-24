@@ -20,8 +20,7 @@ namespace learnfft
         void Inverse(const T* real_in, const T* imag_in, T* real_out, T* imag_out);
 
     private:
-        void FFTRadix2Core(const T* real_in, const T* imag_in, T* real_out, T* imag_out,
-                           bool forward);
+        void FFTRadix2Core(T* real_out, T* imag_out, bool forward);
 
         const size_t m_size;
         std::vector<size_t> m_bit_reverse_idx;
@@ -55,7 +54,7 @@ namespace learnfft
             real_out[i] = real_in[m_bit_reverse_idx[i]];
             imag_out[i] = imag_in[m_bit_reverse_idx[i]];
         }
-        FFTRadix2Core(real_in, imag_in, real_out, imag_out, true);
+        FFTRadix2Core(real_out, imag_out, true);
     }
 
     template <typename T>
@@ -66,12 +65,11 @@ namespace learnfft
             real_out[i] = real_in[m_bit_reverse_idx[i]];
             imag_out[i] = imag_in[m_bit_reverse_idx[i]];
         }
-        FFTRadix2Core(real_in, imag_in, real_out, imag_out, false);
+        FFTRadix2Core(real_out, imag_out, false);
     }
 
     template <typename T>
-    void FFTRadix2<T>::FFTRadix2Core(const T* real_in, const T* imag_in, T* real_out, T* imag_out,
-                                     bool forward)
+    void FFTRadix2<T>::FFTRadix2Core(T* real_out, T* imag_out, bool forward)
     {
         for (int btfly = 2, step = 1; btfly <= m_size; btfly *= 2, step *= 2)
         {
