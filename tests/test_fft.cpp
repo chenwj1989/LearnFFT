@@ -1,11 +1,10 @@
 
-#include "dft.h"
 #include "fft_radix2.h"
-#include "fft_radix2_simd.h"
 #include "fft_real.h"
 #include "fft_recursive.h"
 #include "kissfft/kiss_fft.h"
 #include "kissfft/kiss_fftr.h"
+#include "pffft/pffft.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -27,8 +26,8 @@ static learn_fft_scalar random_value(learn_fft_scalar min, learn_fft_scalar max)
     return ((learn_fft_scalar)rand() / RAND_MAX) * (max - min) + min;
 }
 
-int RunKissfft(const learn_fft_scalar* in_real, const learn_fft_scalar* in_imag, learn_fft_scalar* out_real,
-                learn_fft_scalar* out_imag)
+int RunKissfft(const learn_fft_scalar* in_real, const learn_fft_scalar* in_imag,
+               learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
 {
     kiss_fft_cpx in_cpx[FFT_SIZE];
     kiss_fft_cpx out_cpx[FFT_SIZE];
@@ -46,7 +45,7 @@ int RunKissfft(const learn_fft_scalar* in_real, const learn_fft_scalar* in_imag,
         {
             in_cpx[i].r = in_real[i];
             in_cpx[i].i = in_imag[i];
-        }        
+        }
         start_time = clock();
         kiss_fft(forward_fft, in_cpx, out_cpx);
         end_time = clock();
@@ -119,21 +118,35 @@ int RunKissfftr(learn_fft_scalar* in, learn_fft_scalar* out_real, learn_fft_scal
     kiss_fftr_free(inverse_fft);
     return 0;
 }
-
-int RunDft(const learn_fft_scalar* in_real, const learn_fft_scalar* in_imag, learn_fft_scalar* out_real,
-            learn_fft_scalar* out_imag)
+int RunPffft(const learn_fft_scalar* in_real, const learn_fft_scalar* in_imag,
+             learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
 {
-    learn_fft_scalar tmp_real[FFT_SIZE];
-    learn_fft_scalar tmp_imag[FFT_SIZE];
+    float in_pffft[FFT_SIZE * 2];
+    float out_pffft[FFT_SIZE * 2];
+    float* const scratch_buffer_ =
+        static_cast<float*>(pffft_aligned_malloc(FFT_SIZE * 2 * sizeof(float)));
+    PFFFT_Setup* _pffft = pffft_new_setup(FFT_SIZE, PFFFT_COMPLEX);
 
-    DFT<learn_fft_scalar> my_dft(FFT_SIZE);
+    memset(out_pffft, 0, sizeof(out_pffft));
 
     double total_time = 0;
     for (int l = 0; l < NUM_LOOPS; l++)
     {
+
+        for (int i = 0; i < FFT_SIZE; i++)
+        {
+            in_pffft[i * 2] = (float)in_real[i];
+            in_pffft[i * 2 + 1] = (float)in_imag[i];
+        }
         start_time = clock();
-        my_dft.Forward(in_real, in_imag, out_real, out_imag);
+
+        pffft_transform_ordered(_pffft, in_pffft, out_pffft, scratch_buffer_, PFFFT_FORWARD);
         end_time = clock();
+        for (int i = 0; i < FFT_SIZE; i++)
+        {
+            out_real[i] = (learn_fft_scalar)out_pffft[i * 2];
+            out_imag[i] = (learn_fft_scalar)out_pffft[i * 2 + 1];
+        }
         total_time += end_time - start_time;
     }
 
@@ -143,51 +156,22 @@ int RunDft(const learn_fft_scalar* in_real, const learn_fft_scalar* in_imag, lea
 
     // print out-in error
     learn_fft_scalar error = 0.0;
-    my_dft.Inverse(out_real, out_imag, tmp_real, tmp_imag);
+    pffft_transform_ordered(_pffft, out_pffft, in_pffft, scratch_buffer_, PFFFT_BACKWARD);
     for (int i = 0; i < FFT_SIZE; i++)
     {
-        error += abs(tmp_real[i] / FFT_SIZE - in_real[i]);
-        error += abs(tmp_imag[i] / FFT_SIZE - in_imag[i]);
+        error += abs((learn_fft_scalar)in_pffft[i * 2] / FFT_SIZE - in_real[i]);
+        error += abs((learn_fft_scalar)in_pffft[i * 2 + 1] / FFT_SIZE - in_imag[i]);
     }
-
     error /= FFT_SIZE * 2;
-    std::cout << "DFT->IDFT v.s. input error per sample: " << error << std::endl;
-    return 0;
-}
-int RunDftr(const learn_fft_scalar* in_real, learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
-{
-    learn_fft_scalar tmp_real[FFT_SIZE];
+    std::cout << "FFT->IFFT v.s. input error per sample: " << error << std::endl;
 
-    DFT<learn_fft_scalar> my_dft(FFT_SIZE);
-
-    double total_time = 0;
-    for (int l = 0; l < NUM_LOOPS; l++)
-    {
-        start_time = clock();
-        my_dft.ForwardReal(in_real, out_real, out_imag);
-        end_time = clock();
-        total_time += end_time - start_time;
-    }
-
-    // print time cost
-    std::cout << "FFT time per pass: " << (total_time / NUM_LOOPS) * 1000 / CLOCKS_PER_SEC << " ms."
-              << std::endl;
-
-    // print out-in error
-    learn_fft_scalar error = 0.0;
-    my_dft.InverseReal(out_real, out_imag, tmp_real);
-    for (int i = 0; i < FFT_SIZE; i++)
-    {
-        error += abs(tmp_real[i] / FFT_SIZE - in_real[i]);
-    }
-
-    error /= FFT_SIZE;
-    std::cout << "DFTReal->IDFTReal v.s. input error per sample: " << error << std::endl;
+    pffft_destroy_setup(_pffft);
+    pffft_aligned_free(scratch_buffer_);
     return 0;
 }
 
 int RunFftRecursive(const learn_fft_scalar* in_real, const learn_fft_scalar* in_imag,
-                      learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
+                    learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
 {
     learn_fft_scalar tmp_real[FFT_SIZE];
     learn_fft_scalar tmp_imag[FFT_SIZE];
@@ -221,62 +205,8 @@ int RunFftRecursive(const learn_fft_scalar* in_real, const learn_fft_scalar* in_
     return 0;
 }
 
-int RunFftRadix2SIMD(const learn_fft_scalar* in_real, const learn_fft_scalar* in_imag,
-                   learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
-{
-    FFTRadix2SIMD<learn_fft_scalar> my_dft(FFT_SIZE);
-
-    learn_fft_scalar* in_real_aligned = (learn_fft_scalar*) aligned_alloc(64, FFT_SIZE * sizeof(learn_fft_scalar));
-    learn_fft_scalar* in_imag_aligned = (learn_fft_scalar*) aligned_alloc(64, FFT_SIZE * sizeof(learn_fft_scalar));
-    learn_fft_scalar* out_real_aligned = (learn_fft_scalar*) aligned_alloc(64, FFT_SIZE * sizeof(learn_fft_scalar));
-    learn_fft_scalar* out_imag_aligned = (learn_fft_scalar*) aligned_alloc(64, FFT_SIZE * sizeof(learn_fft_scalar));
-
-    for (int i = 0; i < FFT_SIZE; i++)
-    {
-        in_real_aligned[i] = in_real[i];
-        in_imag_aligned[i] = in_imag[i];
-    }
-
-    double total_time = 0;
-    for (int l = 0; l < NUM_LOOPS; l++)
-    {
-        start_time = clock();
-        my_dft.Forward(in_real_aligned, in_imag_aligned, out_real_aligned, out_imag_aligned);
-        end_time = clock();
-        total_time += end_time - start_time;
-    }
-
-    for (int i = 0; i < FFT_SIZE; i++)
-    {
-        out_real[i] = out_real_aligned[i];
-        out_imag[i] = out_imag_aligned[i];
-    }
-
-    // print time cost
-    std::cout << "FFT time per pass: " << (total_time / NUM_LOOPS) * 1000 / CLOCKS_PER_SEC << " ms."
-              << std::endl;
-
-    // print out-in error
-    learn_fft_scalar error = 0.0;
-    my_dft.Inverse(out_real_aligned, out_imag_aligned, in_real_aligned, in_imag_aligned);
-    for (int i = 0; i < FFT_SIZE; i++)
-    {
-        error += abs(in_real_aligned[i] / FFT_SIZE - in_real[i]);
-        error += abs(in_imag_aligned[i] / FFT_SIZE - in_imag[i]);
-    }
-
-    error /= FFT_SIZE * 2;
-    std::cout << "DFT->IDFT v.s. input error per sample: " << error << std::endl;
-
-    free(in_real_aligned);
-    free(in_imag_aligned);
-    free(out_real_aligned);
-    free(out_imag_aligned);
-    return 0;
-}
-
 int RunFftRadix2(const learn_fft_scalar* in_real, const learn_fft_scalar* in_imag,
-                   learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
+                 learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
 {
     learn_fft_scalar tmp_real[FFT_SIZE];
     learn_fft_scalar tmp_imag[FFT_SIZE];
@@ -310,7 +240,8 @@ int RunFftRadix2(const learn_fft_scalar* in_real, const learn_fft_scalar* in_ima
     return 0;
 }
 
-int RunFftReal(const learn_fft_scalar* in_real, learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
+int RunFftReal(const learn_fft_scalar* in_real, learn_fft_scalar* out_real,
+               learn_fft_scalar* out_imag)
 {
     FFTReal<learn_fft_scalar> my_dft(FFT_SIZE);
 
@@ -349,6 +280,8 @@ int test()
     learn_fft_scalar out_imag[FFT_SIZE];
     learn_fft_scalar out_real_cmp[FFT_SIZE];
     learn_fft_scalar out_imag_cmp[FFT_SIZE];
+    learn_fft_scalar error = 0.0;
+
     // set in buff with rand value
     for (int i = 0; i < FFT_SIZE; i++)
     {
@@ -359,22 +292,23 @@ int test()
     RunKissfft(in_real, in_imag, out_real_cmp, out_imag_cmp);
     std::cout << std::endl;
 
-    std::cout << std::endl << "=====> Run DFT " << std::endl;
-    RunDft(in_real, in_imag, out_real, out_imag);
+    std::cout << std::endl << "=====> Run PFFFT " << std::endl;
+    RunPffft(in_real, in_imag, out_real, out_imag);
     std::cout << std::endl;
-
-    learn_fft_scalar error = 0.0;
+    error = 0.0;
     for (int i = 0; i < FFT_SIZE; i++)
     {
         error += abs(out_real_cmp[i] - out_real[i]);
         error += abs(out_imag_cmp[i] - out_imag[i]);
     }
     error /= FFT_SIZE * 2;
-    std::cout << "DFT v.s. KissFFT error per sample: " << error << std::endl;
+    std::cout << "PFFFT v.s. KissFFT error per sample: " << error << std::endl;
+
 
     std::cout << std::endl << "=====> Run FFTRecursive " << std::endl;
     RunFftRecursive(in_real, in_imag, out_real, out_imag);
     std::cout << std::endl;
+    error = 0.0;
     for (int i = 0; i < FFT_SIZE; i++)
     {
         error += abs(out_real_cmp[i] - out_real[i]);
@@ -386,6 +320,7 @@ int test()
     std::cout << std::endl << "=====> Run FFTRadix2" << std::endl;
     RunFftRadix2(in_real, in_imag, out_real, out_imag);
     std::cout << std::endl;
+    error = 0.0;
     for (int i = 0; i < FFT_SIZE; i++)
     {
         error += abs(out_real_cmp[i] - out_real[i]);
@@ -393,18 +328,6 @@ int test()
     }
     error /= FFT_SIZE * 2;
     std::cout << "FFTRadix2 v.s. KissFFT error per sample: " << error << std::endl;
-
-
-    std::cout << std::endl << "=====> Run FFTRadix2SIMD" << std::endl;
-    RunFftRadix2SIMD(in_real, in_imag, out_real, out_imag);
-    std::cout << std::endl;
-    for (int i = 0; i < FFT_SIZE; i++)
-    {
-        error += abs(out_real_cmp[i] - out_real[i]);
-        error += abs(out_imag_cmp[i] - out_imag[i]);
-    }
-    error /= FFT_SIZE * 2;
-    std::cout << "FFTRadix2SIMD v.s. KissFFT error per sample: " << error << std::endl;
 
     // Real FFT
     // set in buff with rand value
@@ -416,19 +339,6 @@ int test()
     RunKissfftr(in_real, out_real_cmp, out_imag_cmp);
     std::cout << std::endl;
 
-    std::cout << std::endl << "=====> Run DFT Real " << std::endl;
-    RunDftr(in_real, out_real, out_imag);
-    std::cout << std::endl;
-
-    error = 0.0;
-    for (int i = 0; i < FFT_SIZE / 2 + 1; i++)
-    {
-        error += abs(out_real_cmp[i] - out_real[i]);
-        error += abs(out_imag_cmp[i] - out_imag[i]);
-    }
-    error /= FFT_SIZE * 2;
-    std::cout << "DFTReal v.s. KissFFTr error per sample: " << error << std::endl;
-
     std::cout << std::endl << "=====> Run FFT Real " << std::endl;
     RunFftReal(in_real, out_real, out_imag);
     std::cout << std::endl;
@@ -438,8 +348,6 @@ int test()
     {
         error += abs(out_real_cmp[i] - out_real[i]);
         error += abs(out_imag_cmp[i] - out_imag[i]);
-        // std::cout << i << " " << out_real_cmp[i] << " " << out_real[i] << std::endl;
-        // std::cout << i << " " << out_imag_cmp[i] << " " << out_imag[i] << std::endl;
     }
     error /= FFT_SIZE * 2;
     std::cout << "FFTReal v.s. KissFFTr error per sample: " << error << std::endl;

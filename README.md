@@ -12,7 +12,11 @@ Learn to implement FFT step by step using C++.
 # Test
 ```cpp
 cd tests
+
 git clone https://github.com/mborgerding/kissfft.git
-make test_dft
-./test_dft
+git clone https://bitbucket.org/jpommier/pffft.git
+
+make test_fft
+./test_fft
+
 ```

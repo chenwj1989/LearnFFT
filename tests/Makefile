@@ -5,7 +5,7 @@ CCFLAGS  =
 LDFLAGS  =
 LIBS     =
 OBJS     = 
-MAINOBJ  = test_fft.o kissfft/kiss_fft.o kissfft/kiss_fftr.o 
+MAINOBJ  = test_fft.o kissfft/kiss_fft.o kissfft/kiss_fftr.o pffft/pffft.o
 
 OBJ/%.o : %.cpp %.cc
 	$(CXX) -c $(CXXFLAGS) $<
