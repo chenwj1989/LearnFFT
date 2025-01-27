@@ -300,6 +300,59 @@ int RunFftRadix2SIMD(const learn_fft_scalar* in_real, const learn_fft_scalar* in
     return 0;
 }
 
+// int RunFftRadix2SIMDInterleaved(const learn_fft_scalar* in_real, const learn_fft_scalar* in_imag,
+//                      learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
+// {
+//     FFTRadix2SIMD<learn_fft_scalar> my_dft(FFT_SIZE);
+
+//     learn_fft_scalar* in_aligned =
+//         (learn_fft_scalar*)aligned_alloc(64, 2 * FFT_SIZE * sizeof(learn_fft_scalar));
+//     learn_fft_scalar* out_aligned =
+//         (learn_fft_scalar*)aligned_alloc(64, 2 * FFT_SIZE * sizeof(learn_fft_scalar));
+
+//     for (int i = 0; i < FFT_SIZE; i++)
+//     {
+//         in_aligned[i * 2] = in_real[i];
+//         in_aligned[i * 2 +1] = in_imag[i];
+//     }
+
+//     double total_time = 0;
+//     for (int l = 0; l < NUM_LOOPS; l++)
+//     {
+//         start_time = clock();
+//         my_dft.Forward(in_aligned, out_aligned);
+//         end_time = clock();
+//         total_time += end_time - start_time;
+//     }
+
+//     for (int i = 0; i < FFT_SIZE; i++)
+//     {
+//         out_real[i] = out_aligned[i * 2];
+//         out_imag[i] = out_aligned[i * 2 +1];
+//     }
+
+//     // print time cost
+//     std::cout << "FFT interleaved time per pass: " << (total_time / NUM_LOOPS) * 1000 /
+//     CLOCKS_PER_SEC << " ms."
+//               << std::endl;
+
+//     // print out-in error
+//     learn_fft_scalar error = 0.0;
+//     my_dft.Inverse(out_aligned, in_aligned);
+//     for (int i = 0; i < FFT_SIZE; i++)
+//     {
+//         error += abs(in_aligned[i * 2] / FFT_SIZE - in_real[i]);
+//         error += abs(in_aligned[i * 2 +1] / FFT_SIZE - in_imag[i]);
+//     }
+
+//     error /= FFT_SIZE * 2;
+//     std::cout << "FFT->IFFT v.s. input error per sample: " << error << std::endl;
+
+//     free(in_aligned);
+//     free(out_aligned);
+//     return 0;
+// }
+
 int RunFftReal(const learn_fft_scalar* in_real, learn_fft_scalar* out_real,
                learn_fft_scalar* out_imag)
 {
@@ -363,7 +416,6 @@ int test()
     }
     error /= FFT_SIZE * 2;
     std::cout << "PFFFT v.s. KissFFT error per sample: " << error << std::endl;
-
 
     std::cout << std::endl << "=====> Run FFTRecursive " << std::endl;
     RunFftRecursive(in_real, in_imag, out_real, out_imag);

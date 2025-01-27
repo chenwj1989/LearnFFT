@@ -3,10 +3,10 @@
  */
 #pragma once
 
+#include "learn_fft_utils.h"
 #include <iostream>
 #include <math.h>
 #include <vector>
-#include "learn_fft_utils.h"
 
 namespace learnfft
 {
@@ -78,13 +78,12 @@ namespace learnfft
             T i_2_tw = -T(r_2 * m_cos2n[k] + i_2 * m_sin2n[k]);
             real_out[k] = (r_1 + r_2_tw) / 2.;
             imag_out[k] = (i_1 + i_2_tw) / 2.;
-      
+
             T r_2_nk_tw = T(r_2 * m_sin2n[n_k] + i_2 * m_cos2n[n_k]);
             T i_2_nk_tw = -T(-r_2 * m_cos2n[n_k] + i_2 * m_sin2n[n_k]);
 
             real_out[n_k] = (r_1 + r_2_nk_tw) / 2.;
             imag_out[n_k] = (-i_1 + i_2_nk_tw) / 2.;
-            
         }
         int k = m_size / 2;
         real_out[k] = T(real_out[k] + imag_out[k] * m_cos2n[k]);
@@ -116,36 +115,37 @@ namespace learnfft
             m_tmp_real[k] = (x1_real + x2_real) / 2.;
             m_tmp_imag[k] = (x1_imag + x2_imag) / 2.;
 
-            if (n_k != k) {
+            if (n_k != k)
+            {
                 T x2_nk_real = x2_real_tw * m_sin2n[n_k] - x2_imag_tw * m_cos2n[n_k];
                 T x2_nk_imag = -x2_real_tw * m_cos2n[n_k] - x2_imag_tw * m_sin2n[n_k];
 
                 m_tmp_real[n_k] = (x1_real + x2_nk_real) / 2.;
                 m_tmp_imag[n_k] = (-x1_imag + x2_nk_imag) / 2.;
-
             }
         }
 
         m_tmp_real[0] = (real_in[0] + real_in[m_size]) / 2.;
         m_tmp_imag[0] = (real_in[0] - real_in[m_size]) / 2.;
 
-        for (int i = 0; i < m_size; i++) {
-            if (i < m_bit_reverse_idx[i]) {
+        for (int i = 0; i < m_size; i++)
+        {
+            if (i < m_bit_reverse_idx[i])
+            {
                 std::swap(m_tmp_real[i], m_tmp_real[m_bit_reverse_idx[i]]);
                 std::swap(m_tmp_imag[i], m_tmp_imag[m_bit_reverse_idx[i]]);
             }
         }
-        
 
         FFTRealCore(m_tmp_real.data(), m_tmp_imag.data(), false);
-        for (int i = 0; i < m_size; i++) {
+        for (int i = 0; i < m_size; i++)
+        {
             real_out[2 * i] = m_tmp_real[i] / m_size;
             real_out[2 * i + 1] = m_tmp_imag[i] / m_size;
         }
     }
 
-    template <typename T>
-    void FFTReal<T>::FFTRealCore(T* real_out, T* imag_out, bool forward)
+    template <typename T> void FFTReal<T>::FFTRealCore(T* real_out, T* imag_out, bool forward)
     {
         for (int btfly = 2, step = 1; btfly <= m_size; btfly *= 2, step *= 2)
         {

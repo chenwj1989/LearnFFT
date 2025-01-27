@@ -3,10 +3,10 @@
  */
 #pragma once
 
+#include "learn_fft_utils.h"
 #include <iostream>
 #include <math.h>
 #include <vector>
-#include "learn_fft_utils.h"
 
 namespace learnfft
 {
@@ -68,8 +68,7 @@ namespace learnfft
         FFTRadix2Core(real_out, imag_out, false);
     }
 
-    template <typename T>
-    void FFTRadix2<T>::FFTRadix2Core(T* real_out, T* imag_out, bool forward)
+    template <typename T> void FFTRadix2<T>::FFTRadix2Core(T* real_out, T* imag_out, bool forward)
     {
         for (int btfly = 2, step = 1; btfly <= m_size; btfly *= 2, step *= 2)
         {

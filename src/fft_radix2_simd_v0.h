@@ -3,11 +3,11 @@
  */
 #pragma once
 
+#include "learn_fft_utils.h"
+#include <immintrin.h>
 #include <iostream>
 #include <math.h>
 #include <vector>
-#include <immintrin.h>
-#include "learn_fft_utils.h"
 
 namespace learnfft
 {
@@ -22,11 +22,11 @@ namespace learnfft
 
     private:
         void FFTRadix2SIMDCore1(const T* real_in, const T* imag_in, T* real_out, T* imag_out,
-                           bool forward);
+                                bool forward);
         void FFTRadix2SIMDCore2(const T* real_in, const T* imag_in, T* real_out, T* imag_out,
-                           bool forward);
+                                bool forward);
         void FFTRadix2SIMDCore3(const T* real_in, const T* imag_in, T* real_out, T* imag_out,
-                           bool forward);
+                                bool forward);
 
         const size_t m_size;
         std::vector<size_t> m_bit_reverse_idx;
@@ -75,8 +75,8 @@ namespace learnfft
     }
 
     template <typename T>
-    void FFTRadix2SIMD<T>::FFTRadix2SIMDCore1(const T* real_in, const T* imag_in, T* real_out, T* imag_out,
-                                     bool forward)
+    void FFTRadix2SIMD<T>::FFTRadix2SIMDCore1(const T* real_in, const T* imag_in, T* real_out,
+                                              T* imag_out, bool forward)
     {
 
         for (int btfly = 2, step = 1; btfly <= m_size; btfly *= 2, step *= 2)
@@ -93,24 +93,28 @@ namespace learnfft
                     __m256d res_256d;
                     if (forward)
                     {
-                        trig_256d = _mm256_set_pd(m_cos[k][m], m_sin[k][m], -m_sin[k][m], m_cos[k][m]);
+                        trig_256d =
+                            _mm256_set_pd(m_cos[k][m], m_sin[k][m], -m_sin[k][m], m_cos[k][m]);
                     }
                     else
                     {
-                        trig_256d = _mm256_set_pd(m_cos[k][m], -m_sin[k][m], m_sin[k][m], m_cos[k][m]);
+                        trig_256d =
+                            _mm256_set_pd(m_cos[k][m], -m_sin[k][m], m_sin[k][m], m_cos[k][m]);
                     }
-                    odd_256d = _mm256_set_pd(real_out[odd], imag_out[odd], real_out[odd], imag_out[odd]);
+                    odd_256d =
+                        _mm256_set_pd(real_out[odd], imag_out[odd], real_out[odd], imag_out[odd]);
                     res_256d = _mm256_mul_pd(odd_256d, trig_256d);
                     __m256d odd_twiddle_256d = _mm256_hadd_pd(res_256d, res_256d);
-                    __m256d even_256d = _mm256_set_pd(real_out[even], real_out[even], imag_out[even], imag_out[even]);
+                    __m256d even_256d = _mm256_set_pd(real_out[even], real_out[even],
+                                                      imag_out[even], imag_out[even]);
                     res_256d = _mm256_addsub_pd(even_256d, odd_twiddle_256d);
 
                     // std::cout << k << std::endl;
                     // std::cout << real_out[even] << " " <<  imag_out[even]  << std::endl;
                     // std::cout << real_out[odd] << " " <<  imag_out[odd]  << std::endl;
                     // std::cout << odd_twiddle_real << " " <<  odd_twiddle_imag  << std::endl;
-                    
-                    double* p = (double*)&res_256d;	
+
+                    double* p = (double*)&res_256d;
                     real_out[odd] = p[2];
                     imag_out[odd] = p[0];
                     real_out[even] = p[3];
@@ -124,15 +128,16 @@ namespace learnfft
     }
 
     template <typename T>
-    void FFTRadix2SIMD<T>::FFTRadix2SIMDCore2(const T* real_in, const T* imag_in, T* real_out, T* imag_out,
-                                     bool forward)
+    void FFTRadix2SIMD<T>::FFTRadix2SIMDCore2(const T* real_in, const T* imag_in, T* real_out,
+                                              T* imag_out, bool forward)
     {
         for (int btfly = 2, step = 1; btfly <= m_size; btfly *= 2, step *= 2)
         {
             int m = m_size / btfly;
             for (int i = 0; i < m_size; i += btfly)
             {
-                if (step < 4) {
+                if (step < 4)
+                {
                     for (int k = 0; k < step; ++k)
                     {
                         int even = i + k;
@@ -159,8 +164,10 @@ namespace learnfft
                         real_out[even] = real_out[even] + odd_twiddle_real;
                         imag_out[even] = imag_out[even] + odd_twiddle_imag;
                     }
-                } else {
-                    for (int k = 0; k < step; k+=4)
+                }
+                else
+                {
+                    for (int k = 0; k < step; k += 4)
                     {
                         int even = i + k;
                         int odd = even + step;
@@ -169,11 +176,13 @@ namespace learnfft
                         __m256d imag_out_odd_256d = _mm256_loadu_pd(imag_out + odd);
                         __m256d real_out_even_256d = _mm256_loadu_pd(real_out + even);
                         __m256d imag_out_even_256d = _mm256_loadu_pd(imag_out + even);
-                        // __m256d cos_256d = _mm256_set_pd(m_cos[k+3][m], m_cos[k+2][m], m_cos[k+1][m], m_cos[k][m]);
-                        // __m256d sin_256d = _mm256_set_pd(m_sin[k+3][m], m_sin[k+2][m], m_sin[k+1][m], m_sin[k][m]);
+                        // __m256d cos_256d = _mm256_set_pd(m_cos[k+3][m], m_cos[k+2][m],
+                        // m_cos[k+1][m], m_cos[k][m]);
+                        // __m256d sin_256d = _mm256_set_pd(m_sin[k+3][m], m_sin[k+2][m],
+                        // m_sin[k+1][m], m_sin[k][m]);
                         __m256d cos_256d = _mm256_loadu_pd(&m_cos[m][k]);
                         __m256d sin_256d = _mm256_loadu_pd(&m_sin[m][k]);
-                                            
+
                         __m256d ac_256d = _mm256_mul_pd(real_out_odd_256d, cos_256d);
                         __m256d bd_256d = _mm256_mul_pd(imag_out_odd_256d, sin_256d);
                         __m256d ad_256d = _mm256_mul_pd(real_out_odd_256d, sin_256d);
@@ -192,79 +201,74 @@ namespace learnfft
                             odd_twiddle_imag_256d = _mm256_add_pd(bc_256d, ad_256d);
                         }
 
-                        real_out_odd_256d = _mm256_sub_pd(real_out_even_256d, odd_twiddle_real_256d);
-                        imag_out_odd_256d = _mm256_sub_pd(imag_out_even_256d, odd_twiddle_imag_256d);
-                        real_out_even_256d = _mm256_add_pd(real_out_even_256d, odd_twiddle_real_256d);
-                        imag_out_even_256d = _mm256_add_pd(imag_out_even_256d, odd_twiddle_imag_256d);
+                        real_out_odd_256d =
+                            _mm256_sub_pd(real_out_even_256d, odd_twiddle_real_256d);
+                        imag_out_odd_256d =
+                            _mm256_sub_pd(imag_out_even_256d, odd_twiddle_imag_256d);
+                        real_out_even_256d =
+                            _mm256_add_pd(real_out_even_256d, odd_twiddle_real_256d);
+                        imag_out_even_256d =
+                            _mm256_add_pd(imag_out_even_256d, odd_twiddle_imag_256d);
 
                         _mm256_storeu_pd(real_out + odd, real_out_odd_256d);
                         _mm256_storeu_pd(imag_out + odd, imag_out_odd_256d);
                         _mm256_storeu_pd(real_out + even, real_out_even_256d);
                         _mm256_storeu_pd(imag_out + even, imag_out_even_256d);
-
                     }
                 }
-
             }
         }
     }
 
     template <typename T>
-    void FFTRadix2SIMD<T>::FFTRadix2SIMDCore3(const T* real_in, const T* imag_in, T* real_out, T* imag_out,
-                                     bool forward)
+    void FFTRadix2SIMD<T>::FFTRadix2SIMDCore3(const T* real_in, const T* imag_in, T* real_out,
+                                              T* imag_out, bool forward)
     {
         for (int btfly = 2, step = 1; btfly <= m_size; btfly *= 2, step *= 2)
         {
             int m = m_size / btfly;
-            for (int i = 0; i < m_size; i += btfly)
+            if (step < 2)
             {
-                if (step < 2) {
-                    int k = 0;
+                for (int i = 0; i < m_size; i += btfly)
+                {
                     int even = i;
                     int odd = even + 1;
-                    __m256d odd_256d;
-                    __m256d trig_256d;
-                    __m256d res_256d;
-                    if (forward)
-                    {
-                        trig_256d = _mm256_set_pd(m_cos[k][m], m_sin[k][m], -m_sin[k][m], m_cos[k][m]);
-                    }
-                    else
-                    {
-                        trig_256d = _mm256_set_pd(m_cos[k][m], -m_sin[k][m], m_sin[k][m], m_cos[k][m]);
-                    }
-                    odd_256d = _mm256_set_pd(real_out[odd], imag_out[odd], real_out[odd], imag_out[odd]);
-                    res_256d = _mm256_mul_pd(odd_256d, trig_256d);
-                    __m256d odd_twiddle_256d = _mm256_hadd_pd(res_256d, res_256d);
-                    __m256d even_256d = _mm256_set_pd(real_out[even], real_out[even], imag_out[even], imag_out[even]);
-                    res_256d = _mm256_addsub_pd(even_256d, odd_twiddle_256d);
-                    
-                    double* p = (double*)&res_256d;	
+                    __m256d odd_twiddle_256d =
+                        _mm256_set_pd(real_out[odd], real_out[odd], imag_out[odd], imag_out[odd]);
+                    __m256d even_256d = _mm256_set_pd(real_out[even], real_out[even],
+                                                      imag_out[even], imag_out[even]);
+                    __m256d res_256d = _mm256_addsub_pd(even_256d, odd_twiddle_256d);
+
+                    double* p = (double*)&res_256d;
                     real_out[odd] = p[2];
                     imag_out[odd] = p[0];
                     real_out[even] = p[3];
                     imag_out[even] = p[1];
-                       
-                } else if (step < 4) {
-                    for (int k = 0; k < step; k+=2)
+                }
+            }
+            else if (step < 4)
+            {
+                for (int i = 0; i < m_size; i += btfly)
+                {
+                    for (int k = 0; k < step; k += 2)
                     {
                         int even = i + k;
                         int odd = even + step;
 
-                         __m128d real_out_odd_128d= _mm_loadu_pd(real_out + odd);
-                         __m128d imag_out_odd_128d= _mm_loadu_pd(imag_out + odd);
-                         __m128d real_out_even_128d= _mm_loadu_pd(real_out + even);
-                         __m128d imag_out_even_128d = _mm_loadu_pd(imag_out + even);
-                         __m128d cos_128d = _mm_loadu_pd(&m_cos[m][k]);
-                         __m128d sin_128d = _mm_loadu_pd(&m_sin[m][k]);
-                                            
-                         __m128d ac_128d = _mm_mul_pd(real_out_odd_128d, cos_128d);
-                         __m128d bd_128d = _mm_mul_pd(imag_out_odd_128d, sin_128d);
-                         __m128d ad_128d = _mm_mul_pd(real_out_odd_128d, sin_128d);
-                         __m128d bc_128d = _mm_mul_pd(imag_out_odd_128d, cos_128d);
+                        __m128d real_out_odd_128d = _mm_loadu_pd(real_out + odd);
+                        __m128d imag_out_odd_128d = _mm_loadu_pd(imag_out + odd);
+                        __m128d real_out_even_128d = _mm_loadu_pd(real_out + even);
+                        __m128d imag_out_even_128d = _mm_loadu_pd(imag_out + even);
+                        __m128d cos_128d = _mm_loadu_pd(&m_cos[m][k]);
+                        __m128d sin_128d = _mm_loadu_pd(&m_sin[m][k]);
 
-                         __m128d odd_twiddle_real_128d;
-                         __m128d odd_twiddle_imag_128d;
+                        __m128d ac_128d = _mm_mul_pd(real_out_odd_128d, cos_128d);
+                        __m128d bd_128d = _mm_mul_pd(imag_out_odd_128d, sin_128d);
+                        __m128d ad_128d = _mm_mul_pd(real_out_odd_128d, sin_128d);
+                        __m128d bc_128d = _mm_mul_pd(imag_out_odd_128d, cos_128d);
+
+                        __m128d odd_twiddle_real_128d;
+                        __m128d odd_twiddle_imag_128d;
                         if (forward)
                         {
                             odd_twiddle_real_128d = _mm_add_pd(ac_128d, bd_128d);
@@ -285,10 +289,14 @@ namespace learnfft
                         _mm_storeu_pd(imag_out + odd, imag_out_odd_128d);
                         _mm_storeu_pd(real_out + even, real_out_even_128d);
                         _mm_storeu_pd(imag_out + even, imag_out_even_128d);
-
                     }
-                } else {
-                    for (int k = 0; k < step; k+=4)
+                }
+            }
+            else
+            {
+                for (int i = 0; i < m_size; i += btfly)
+                {
+                    for (int k = 0; k < step; k += 4)
                     {
                         int even = i + k;
                         int odd = even + step;
@@ -297,11 +305,13 @@ namespace learnfft
                         __m256d imag_out_odd_256d = _mm256_loadu_pd(imag_out + odd);
                         __m256d real_out_even_256d = _mm256_loadu_pd(real_out + even);
                         __m256d imag_out_even_256d = _mm256_loadu_pd(imag_out + even);
-                        // __m256d cos_256d = _mm256_set_pd(m_cos[k+3][m], m_cos[k+2][m], m_cos[k+1][m], m_cos[k][m]);
-                        // __m256d sin_256d = _mm256_set_pd(m_sin[k+3][m], m_sin[k+2][m], m_sin[k+1][m], m_sin[k][m]);
+                        // __m256d cos_256d = _mm256_set_pd(m_cos[k+3][m], m_cos[k+2][m],
+                        // m_cos[k+1][m], m_cos[k][m]);
+                        // __m256d sin_256d = _mm256_set_pd(m_sin[k+3][m], m_sin[k+2][m],
+                        // m_sin[k+1][m], m_sin[k][m]);
                         __m256d cos_256d = _mm256_loadu_pd(&m_cos[m][k]);
                         __m256d sin_256d = _mm256_loadu_pd(&m_sin[m][k]);
-                                            
+
                         __m256d ac_256d = _mm256_mul_pd(real_out_odd_256d, cos_256d);
                         __m256d bd_256d = _mm256_mul_pd(imag_out_odd_256d, sin_256d);
                         __m256d ad_256d = _mm256_mul_pd(real_out_odd_256d, sin_256d);
@@ -320,20 +330,23 @@ namespace learnfft
                             odd_twiddle_imag_256d = _mm256_add_pd(bc_256d, ad_256d);
                         }
 
-                        real_out_odd_256d = _mm256_sub_pd(real_out_even_256d, odd_twiddle_real_256d);
-                        imag_out_odd_256d = _mm256_sub_pd(imag_out_even_256d, odd_twiddle_imag_256d);
-                        real_out_even_256d = _mm256_add_pd(real_out_even_256d, odd_twiddle_real_256d);
-                        imag_out_even_256d = _mm256_add_pd(imag_out_even_256d, odd_twiddle_imag_256d);
+                        real_out_odd_256d =
+                            _mm256_sub_pd(real_out_even_256d, odd_twiddle_real_256d);
+                        imag_out_odd_256d =
+                            _mm256_sub_pd(imag_out_even_256d, odd_twiddle_imag_256d);
+                        real_out_even_256d =
+                            _mm256_add_pd(real_out_even_256d, odd_twiddle_real_256d);
+                        imag_out_even_256d =
+                            _mm256_add_pd(imag_out_even_256d, odd_twiddle_imag_256d);
 
                         _mm256_storeu_pd(real_out + odd, real_out_odd_256d);
                         _mm256_storeu_pd(imag_out + odd, imag_out_odd_256d);
                         _mm256_storeu_pd(real_out + even, real_out_even_256d);
                         _mm256_storeu_pd(imag_out + even, imag_out_even_256d);
-
                     }
                 }
-
             }
         }
     }
+
 } // namespace learnfft
