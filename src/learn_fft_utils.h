@@ -3,6 +3,8 @@
  */
 #pragma once
 #include <vector>
+#include <stddef.h>
+#include <string.h>
 
 static void GenBitReverseOrder(size_t len, std::vector<size_t>& arr)
 {
