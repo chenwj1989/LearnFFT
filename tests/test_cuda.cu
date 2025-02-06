@@ -17,7 +17,7 @@ double start_time, end_time, total_time;
             printf("code:%d,reason:%s\n", error, cudaGetErrorString(error));                       \
             exit(1);                                                                               \
         }                                                                                          \
-    }tests/test_cuda.cu
+    }
 
 __global__ void kernelHelloWorld(void)
 {
