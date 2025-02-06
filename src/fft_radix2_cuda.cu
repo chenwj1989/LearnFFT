@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2025, wjchen, BSD 3-Clause License
  */
+#include <cuda.h>
 #include <cuda_runtime.h>
 #include <iostream>
-#include <math.h>
 #include <vector>
 #include "fft_radix2_cuda.h"
 
@@ -82,14 +82,14 @@ namespace learnfft
         int n_bytes = m_size * sizeof(double);
         cudaMemcpy((void*)m_dev_real, (void*)real_data, n_bytes, cudaMemcpyHostToDevice);
         cudaMemcpy((void*)m_dev_imag, (void*)imag_data, n_bytes, cudaMemcpyHostToDevice);
-        int tx = 1024;
+        int tx = 256;
         int bx = (m_size + tx - 1) / tx;
         const dim3 blockSize(tx);
         const dim3 gridSize(bx);
         for (int btfly = 2; btfly <= m_size; btfly *= 2)
         {
             kernelFFTRadix2<<<gridSize, blockSize>>>(m_dev_real, m_dev_imag, forward, btfly, m_size);
-            cudaDeviceSynchronize();
+            // cudaDeviceSynchronize();
         }
         cudaMemcpy((void*)real_data, (void*)m_dev_real, n_bytes, cudaMemcpyDeviceToHost);
         cudaMemcpy((void*)imag_data, (void*)m_dev_imag, n_bytes, cudaMemcpyDeviceToHost);
