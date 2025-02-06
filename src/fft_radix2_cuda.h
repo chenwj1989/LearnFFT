@@ -10,6 +10,7 @@
 
 namespace learnfft
 {
+    class FFTCUDAImpl;
     class FFTRadix2CUDA
     {
     public:
@@ -20,11 +21,10 @@ namespace learnfft
         void Inverse(const double* real_in, const double* imag_in, double* real_out, double* imag_out);
 
     private:
-        void FFTRadix2Core(double* real_out, double* imag_out, bool forward);
-
         const size_t m_size;
         std::vector<size_t> m_bit_reverse_idx;
-        std::vector<std::vector<double>> m_sin;
-        std::vector<std::vector<double>> m_cos;
+        FFTCUDAImpl* m_impl;
+
     };
+
 } // namespace learnfft
