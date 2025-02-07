@@ -4,10 +4,6 @@ project(learnfft)
 # C++ standard
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(CUDA REQUIRED)
-
-message(STATUS "cuda version: " ${CUDA_VERSION_STRING})
-include_directories(${CUDA_INCLUDE_DIRS})
 
 add_definitions(-Dlearn_fft_scalar=double)
 add_definitions(-Dkiss_fft_scalar=double)
@@ -26,10 +22,19 @@ file(GLOB dep_srcs  kissfft/kiss_fft.c
                     pffft/pffft.c)
 
 add_executable(test_dft test_dft.cpp ${learnfft_srcs} ${dep_srcs})
-target_link_libraries(test_dft PRIVATE learnfft)
+# target_link_libraries(test_dft PRIVATE learnfft)
 
 add_executable(test_fft test_fft.cpp ${learnfft_srcs} ${dep_srcs})
-target_link_libraries(test_fft PRIVATE learnfft)
+# target_link_libraries(test_fft PRIVATE learnfft)
+
+add_executable(test_avx test_avx.cpp ${learnfft_srcs} ${dep_srcs})
+# target_link_libraries(test_avx PRIVATE learnfft)
+
+find_package(CUDA)
+
+IF (CUDA_VERSION_STRING)
+message(STATUS "cuda version: " ${CUDA_VERSION_STRING})
+include_directories(${CUDA_INCLUDE_DIRS})
 
 cuda_add_executable(test_cuda test_cuda.cu)
 target_link_libraries(test_cuda ${CUDA_LIBRARIES})
@@ -37,3 +42,4 @@ target_link_libraries(test_cuda ${CUDA_LIBRARIES})
 file(GLOB learnfft_cu  ../src/*.cu)
 cuda_add_executable(test_fft_cuda test_fft_cuda.cpp ${learnfft_cu})
 target_link_libraries(test_fft_cuda learnfft ${CUDA_LIBRARIES})
+ENDIF ()
