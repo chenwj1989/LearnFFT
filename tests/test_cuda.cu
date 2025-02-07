@@ -1,8 +1,8 @@
 #include <cuda_runtime.h>
-#include <stdio.h>
 #include <math.h>
-#include <vector>
+#include <stdio.h>
 #include <time.h>
+#include <vector>
 
 double start_time, end_time, total_time;
 
@@ -29,7 +29,8 @@ __global__ void kernelSineCosine(double* d_sin, double* d_cos, int len)
 {
     int i = blockIdx.y * blockDim.y + threadIdx.y;
     int j = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= len  || j >= len) return;
+    if (i >= len || j >= len)
+        return;
 
     int p = i * len + j;
     double arg = (double(i) * double(j) * M_PI * 2.0) / len;
@@ -37,13 +38,16 @@ __global__ void kernelSineCosine(double* d_sin, double* d_cos, int len)
     d_cos[p] = cos(arg);
 }
 
-__global__ void kernelDFT(const double* real_in, const double* imag_in, double* real_out, double* imag_out, int len)
+__global__ void kernelDFT(const double* real_in, const double* imag_in, double* real_out,
+                          double* imag_out, int len)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= len) return;
+    if (i >= len)
+        return;
 
     double re = 0.0, im = 0.0;
-    for (int j = 0; j < len; ++j) {
+    for (int j = 0; j < len; ++j)
+    {
         double arg = (double(i) * double(j) * M_PI * 2.0) / len;
         double _sin = cos(arg);
         double _cos = cos(arg);
@@ -77,8 +81,8 @@ int testSineCosine(int len)
     std::vector<double> h_cos(len_lut);
     start_time = clock();
     int n_bytes = len_lut * sizeof(double);
-    double *d_sin;
-    double *d_cos;
+    double* d_sin;
+    double* d_cos;
     cudaMalloc((void**)&d_sin, n_bytes);
     cudaMalloc((void**)&d_cos, n_bytes);
 
@@ -125,7 +129,8 @@ int testNaiveDFT(int len)
     for (int i = 0; i < len; ++i)
     {
         double re = 0.0, im = 0.0;
-        for (int j = 0; j < len; ++j) {
+        for (int j = 0; j < len; ++j)
+        {
             double arg = (double(i) * double(j) * M_PI * 2.0) / len;
             double _sin = cos(arg);
             double _cos = cos(arg);
@@ -143,10 +148,10 @@ int testNaiveDFT(int len)
     std::vector<double> h_imag(len);
     start_time = clock();
     int n_bytes = len * sizeof(double);
-    double *d_real_in;
-    double *d_imag_in;
-    double *d_real_out;
-    double *d_imag_out;
+    double* d_real_in;
+    double* d_imag_in;
+    double* d_real_out;
+    double* d_imag_out;
     cudaMalloc((void**)&d_real_in, n_bytes);
     cudaMalloc((void**)&d_imag_in, n_bytes);
     cudaMalloc((void**)&d_real_out, n_bytes);
@@ -190,9 +195,9 @@ int main(int argc, char** argv)
     printf("===>Test GPU Hello world!\n");
     kernelHelloWorld<<<1, 10>>>();
     cudaDeviceSynchronize();
-    
+
     printf("===>Test GPU Sine/Cosine!\n");
-    testSineCosine(1024); 
+    testSineCosine(1024);
 
     printf("===>Test GPU DFT!\n");
     testNaiveDFT(1024);

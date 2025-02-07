@@ -205,9 +205,8 @@ int RunFftRadix2(const learn_fft_scalar* in_real, const learn_fft_scalar* in_ima
     return 0;
 }
 
-
 int RunFftRadix2CUDA(const learn_fft_scalar* in_real, const learn_fft_scalar* in_imag,
-                 learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
+                     learn_fft_scalar* out_real, learn_fft_scalar* out_imag)
 {
     learn_fft_scalar tmp_real[FFT_SIZE];
     learn_fft_scalar tmp_imag[FFT_SIZE];
@@ -285,7 +284,6 @@ int test()
     error /= FFT_SIZE * 2;
     std::cout << "FFTRadix2 v.s. KissFFT error per sample: " << error << std::endl;
 
-
     std::cout << std::endl << "=====> Run FFTRadix2CUDA" << std::endl;
     RunFftRadix2CUDA(in_real, in_imag, out_real, out_imag);
     std::cout << std::endl;
@@ -300,7 +298,6 @@ int test()
 
     return 0;
 }
-
 
 int main(int argc, const char* argv[])
 {
