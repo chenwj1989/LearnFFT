@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(learnfft)
 
 # C++ standard
@@ -8,8 +8,8 @@ set(CMAKE_CXX_STANDARD 17)
 add_definitions(-Dlearn_fft_scalar=double)
 add_definitions(-Dkiss_fft_scalar=double)
 
-SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O2 -Wall -fPIC -mavx -march=native")
-SET(CMAKE_C_FLAGS "$ENV{CFLAGS} -O2 -Wall -fPIC -mavx -march=native")
+SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O2 -Wall -fPIC")
+SET(CMAKE_C_FLAGS "$ENV{CFLAGS} -O2 -Wall -fPIC")
 
 include_directories(../src)
 include_directories(kissfft/)
@@ -22,16 +22,16 @@ file(GLOB dep_srcs  kissfft/kiss_fft.c
                     pffft/pffft.c)
 
 add_executable(test_dft test_dft.cpp ${learnfft_srcs} ${dep_srcs})
-# target_link_libraries(test_dft PRIVATE learnfft)
 
 add_executable(test_fft test_fft.cpp ${learnfft_srcs} ${dep_srcs})
-# target_link_libraries(test_fft PRIVATE learnfft)
+
+add_executable(test_fft_simd test_fft_simd.cpp ${learnfft_srcs} ${dep_srcs})
+target_compile_options(test_fft_simd PRIVATE -mavx )
 
 add_executable(test_avx test_avx.cpp ${learnfft_srcs} ${dep_srcs})
-# target_link_libraries(test_avx PRIVATE learnfft)
+target_compile_options(test_avx PRIVATE -mavx )
 
 find_package(CUDA)
-
 IF (CUDA_VERSION_STRING)
 message(STATUS "cuda version: " ${CUDA_VERSION_STRING})
 include_directories(${CUDA_INCLUDE_DIRS})
