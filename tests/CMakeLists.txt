@@ -4,7 +4,6 @@ project(learnfft)
 # C++ standard
 set(CMAKE_CXX_STANDARD 17)
 
-
 add_definitions(-Dlearn_fft_scalar=double)
 add_definitions(-Dkiss_fft_scalar=double)
 

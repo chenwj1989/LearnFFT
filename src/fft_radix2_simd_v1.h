@@ -25,32 +25,39 @@ namespace learnfft
 
         const size_t m_size;
         std::vector<size_t> m_bit_reverse_idx;
-        std::vector<std::vector<T>> m_sin;
-        std::vector<std::vector<T>> m_cos;
+        T* m_sin;
+        T* m_cos;
         T* m_real;
         T* m_imag;
     };
 
     template <typename T>
     FFTRadix2SIMD<T>::FFTRadix2SIMD(size_t size)
-        : m_size(size), m_bit_reverse_idx(size), m_sin(size, std::vector<T>(size)),
-          m_cos(size, std::vector<T>(size)), m_real(nullptr), m_imag(nullptr)
+        : m_size(size), m_bit_reverse_idx(size), m_sin(nullptr), m_cos(nullptr), m_real(nullptr),
+          m_imag(nullptr)
     {
+
+        m_sin = (T*)aligned_alloc(64, size * size * sizeof(T));
+        m_cos = (T*)aligned_alloc(64, size * size * sizeof(T));
+        m_real = (T*)aligned_alloc(64, size * sizeof(T));
+        m_imag = (T*)aligned_alloc(64, size * sizeof(T));
+
+        size_t p = 0;
         for (int i = 0; i < m_size; ++i)
         {
-            for (int j = 0; j < m_size; ++j)
+            for (int j = 0; j < m_size; ++j, p++)
             {
                 double arg = (double(i) * double(j) * M_PI * 2.0) / m_size;
-                m_sin[i][j] = sin(arg);
-                m_cos[i][j] = cos(arg);
+                m_sin[p] = sin(arg);
+                m_cos[p] = cos(arg);
             }
         }
         GenBitReverseOrder(m_size, m_bit_reverse_idx);
-        m_real = (T*)aligned_alloc(64, size * sizeof(T));
-        m_imag = (T*)aligned_alloc(64, size * sizeof(T));
     }
     template <typename T> FFTRadix2SIMD<T>::~FFTRadix2SIMD()
     {
+        free(m_sin);
+        free(m_cos);
         free(m_real);
         free(m_imag);
     }
@@ -97,6 +104,8 @@ namespace learnfft
         for (int btfly = 2, step = 1; btfly <= m_size; btfly *= 2, step *= 2)
         {
             int m = m_size / btfly;
+            size_t ptr = m * m_size;
+
             if (step < 2)
             {
                 for (int i = 0; i < m_size; i += btfly)
@@ -129,8 +138,8 @@ namespace learnfft
                         __m128d imag_out_odd_128d = _mm_load_pd(imag_out + odd);
                         __m128d real_out_even_128d = _mm_load_pd(real_out + even);
                         __m128d imag_out_even_128d = _mm_load_pd(imag_out + even);
-                        __m128d cos_128d = _mm_load_pd(&m_cos[m][k]);
-                        __m128d sin_128d = _mm_load_pd(&m_sin[m][k]);
+                        __m128d cos_128d = _mm_load_pd(&m_cos[ptr + k]);
+                        __m128d sin_128d = _mm_load_pd(&m_sin[ptr + k]);
 
                         __m128d ac_128d = _mm_mul_pd(real_out_odd_128d, cos_128d);
                         __m128d bd_128d = _mm_mul_pd(imag_out_odd_128d, sin_128d);
@@ -179,8 +188,8 @@ namespace learnfft
                         // m_cos[k+1][m], m_cos[k][m]);
                         // __m256d sin_256d = _mm256_set_pd(m_sin[k+3][m], m_sin[k+2][m],
                         // m_sin[k+1][m], m_sin[k][m]);
-                        __m256d cos_256d = _mm256_load_pd(&m_cos[m][k]);
-                        __m256d sin_256d = _mm256_load_pd(&m_sin[m][k]);
+                        __m256d cos_256d = _mm256_load_pd(&m_cos[ptr + k]);
+                        __m256d sin_256d = _mm256_load_pd(&m_sin[ptr + k]);
 
                         __m256d ac_256d = _mm256_mul_pd(real_out_odd_256d, cos_256d);
                         __m256d bd_256d = _mm256_mul_pd(imag_out_odd_256d, sin_256d);

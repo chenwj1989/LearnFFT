@@ -83,8 +83,8 @@ namespace learnfft
                     int odd = even + 1;
                     __m128 odd_twiddle_4x =
                         _mm_set_ps(real_out[odd], real_out[odd], imag_out[odd], imag_out[odd]);
-                    __m128 even_4x = _mm_set_ps(real_out[even], real_out[even],
-                                                      imag_out[even], imag_out[even]);
+                    __m128 even_4x =
+                        _mm_set_ps(real_out[even], real_out[even], imag_out[even], imag_out[even]);
                     __m128 res_4x = _mm_addsub_ps(even_4x, odd_twiddle_4x);
 
                     float* p = (float*)&res_4x;
@@ -164,14 +164,10 @@ namespace learnfft
                             odd_twiddle_imag_4x = _mm_add_ps(bc_4x, ad_4x);
                         }
 
-                        real_out_odd_4x =
-                            _mm_sub_ps(real_out_even_4x, odd_twiddle_real_4x);
-                        imag_out_odd_4x =
-                            _mm_sub_ps(imag_out_even_4x, odd_twiddle_imag_4x);
-                        real_out_even_4x =
-                            _mm_add_ps(real_out_even_4x, odd_twiddle_real_4x);
-                        imag_out_even_4x =
-                            _mm_add_ps(imag_out_even_4x, odd_twiddle_imag_4x);
+                        real_out_odd_4x = _mm_sub_ps(real_out_even_4x, odd_twiddle_real_4x);
+                        imag_out_odd_4x = _mm_sub_ps(imag_out_even_4x, odd_twiddle_imag_4x);
+                        real_out_even_4x = _mm_add_ps(real_out_even_4x, odd_twiddle_real_4x);
+                        imag_out_even_4x = _mm_add_ps(imag_out_even_4x, odd_twiddle_imag_4x);
 
                         _mm_store_ps(real_out + odd, real_out_odd_4x);
                         _mm_store_ps(imag_out + odd, imag_out_odd_4x);

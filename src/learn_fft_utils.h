@@ -2,9 +2,9 @@
  * Copyright (c) 2025, wjchen, BSD 3-Clause License
  */
 #pragma once
-#include <vector>
 #include <stddef.h>
 #include <string.h>
+#include <vector>
 
 static void GenBitReverseOrder(size_t len, std::vector<size_t>& arr)
 {
