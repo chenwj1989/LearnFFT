@@ -147,6 +147,7 @@ namespace learnfft
 
     template <typename T> void FFTReal<T>::FFTRealCore(T* real_out, T* imag_out, bool forward)
     {
+        int f_sign = forward ? 1 : -1;
         for (int btfly = 2, step = 1; btfly <= m_size; btfly *= 2, step *= 2)
         {
             int m = m_size / btfly;
@@ -156,22 +157,11 @@ namespace learnfft
                 {
                     int even = i + k;
                     int odd = even + step;
-                    T odd_twiddle_real;
-                    T odd_twiddle_imag;
-                    if (forward)
-                    {
-                        odd_twiddle_real =
-                            T(real_out[odd] * m_cos[k][m] + imag_out[odd] * m_sin[k][m]);
-                        odd_twiddle_imag =
-                            T(-real_out[odd] * m_sin[k][m] + imag_out[odd] * m_cos[k][m]);
-                    }
-                    else
-                    {
-                        odd_twiddle_real =
-                            T(real_out[odd] * m_cos[k][m] - imag_out[odd] * m_sin[k][m]);
-                        odd_twiddle_imag =
-                            T(real_out[odd] * m_sin[k][m] + imag_out[odd] * m_cos[k][m]);
-                    }
+
+                    T odd_twiddle_real =
+                        T(real_out[odd] * m_cos[k][m] + f_sign * imag_out[odd] * m_sin[k][m]);
+                    T odd_twiddle_imag =
+                        T(imag_out[odd] * m_cos[k][m] - f_sign * real_out[odd] * m_sin[k][m]);
 
                     real_out[odd] = real_out[even] - odd_twiddle_real;
                     imag_out[odd] = imag_out[even] - odd_twiddle_imag;

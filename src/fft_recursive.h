@@ -82,6 +82,7 @@ namespace learnfft
     void FFTRecursive<T>::FFTCoreRecursive(const int len, T* real_in, T* imag_in, T* real_out,
                                            T* imag_out, bool forward)
     {
+        int f_sign = forward ? 1 : -1;
         if (len == 1)
         {
             real_out[0] = T(real_in[0]);
@@ -108,22 +109,10 @@ namespace learnfft
                              forward);
             for (int k = 0; k < half_len; ++k)
             {
-                T odd_twiddle_real;
-                T odd_twiddle_imag;
-                if (forward)
-                {
-                    odd_twiddle_real =
-                        T(odd_out_real[k] * m_cos[k][m] + odd_out_imag[k] * m_sin[k][m]);
-                    odd_twiddle_imag =
-                        T(-odd_out_real[k] * m_sin[k][m] + odd_out_imag[k] * m_cos[k][m]);
-                }
-                else
-                {
-                    odd_twiddle_real =
-                        T(odd_out_real[k] * m_cos[k][m] - odd_out_imag[k] * m_sin[k][m]);
-                    odd_twiddle_imag =
-                        T(odd_out_real[k] * m_sin[k][m] + odd_out_imag[k] * m_cos[k][m]);
-                }
+                T odd_twiddle_real =
+                    T(odd_out_real[k] * m_cos[k][m] + f_sign * odd_out_imag[k] * m_sin[k][m]);
+                T odd_twiddle_imag =
+                    T(odd_out_imag[k] * m_cos[k][m] - f_sign * odd_out_real[k] * m_sin[k][m]);
 
                 real_out[k + half_len] = even_out_real[k] - odd_twiddle_real;
                 imag_out[k + half_len] = even_out_imag[k] - odd_twiddle_imag;
