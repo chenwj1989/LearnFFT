@@ -24,11 +24,13 @@ add_executable(test_dft test_dft.cpp ${learnfft_srcs} ${dep_srcs})
 
 add_executable(test_fft test_fft.cpp ${learnfft_srcs} ${dep_srcs})
 
+IF (ENABLE_SIMD)
 add_executable(test_fft_simd test_fft_simd.cpp ${learnfft_srcs} ${dep_srcs})
 target_compile_options(test_fft_simd PRIVATE -mavx )
 
 add_executable(test_avx test_avx.cpp ${learnfft_srcs} ${dep_srcs})
 target_compile_options(test_avx PRIVATE -mavx )
+ENDIF ()
 
 find_package(CUDA)
 IF (CUDA_VERSION_STRING)
