@@ -26,7 +26,7 @@ DFT是离散傅里叶变换，是一种适合计算机实现的傅里叶变换�
 
 ![](Fourier_series_and_transform.gif)
 
-*[Fourier transform time and frequency domains (small).gif, CC0, By Lucas Vieira](https://commons.wikimedia.org/w/index.php?curid=28399050)*
+*[Source: Fourier transform time and frequency domains (small).gif, CC0, By Lucas Vieira](https://commons.wikimedia.org/w/index.php?curid=28399050)*
 
 傅里叶级数将一组倍频的三角函数作为正交基，周期信号可变换为这组正交基的权重。
 

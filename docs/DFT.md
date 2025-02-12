@@ -30,7 +30,7 @@ The Fourier series offers a way to break down a periodic function into a combina
 
 ![](Fourier_series_and_transform.gif)
 
-*[Fourier transform time and frequency domains (small).gif, CC0, By Lucas Vieira](https://commons.wikimedia.org/w/index.php?curid=28399050)*
+*[Source: Fourier transform time and frequency domains (small).gif, CC0, By Lucas Vieira](https://commons.wikimedia.org/w/index.php?curid=28399050)*
 
 The Fourier series utilizes frequency-multiplying trigonometric functions as a set of orthogonal basis, and transforms a periodic signal into coefficients of these orthogonal basis.
 

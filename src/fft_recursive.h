@@ -19,8 +19,8 @@ namespace learnfft
         void Inverse(const T* real_in, const T* imag_in, T* real_out, T* imag_out);
 
     private:
-        void FFTCoreRecursive(const int len, T* real_in, T* imag_in, T* real_out, T* imag_out,
-                              bool forward);
+        void FFTRadix2Recursive(const int len, T* real_in, T* imag_in, T* real_out, T* imag_out,
+                                bool forward);
         void DeInterleave(const int len, T* data);
 
         const size_t m_size;
@@ -53,7 +53,7 @@ namespace learnfft
     {
         memcpy(m_tmp_real.data(), real_in, sizeof(T) * m_size);
         memcpy(m_tmp_imag.data(), imag_in, sizeof(T) * m_size);
-        FFTCoreRecursive(m_size, m_tmp_real.data(), m_tmp_imag.data(), real_out, imag_out, true);
+        FFTRadix2Recursive(m_size, m_tmp_real.data(), m_tmp_imag.data(), real_out, imag_out, true);
     }
 
     template <typename T>
@@ -61,7 +61,7 @@ namespace learnfft
     {
         memcpy(m_tmp_real.data(), real_in, sizeof(T) * m_size);
         memcpy(m_tmp_imag.data(), imag_in, sizeof(T) * m_size);
-        FFTCoreRecursive(m_size, m_tmp_real.data(), m_tmp_imag.data(), real_out, imag_out, false);
+        FFTRadix2Recursive(m_size, m_tmp_real.data(), m_tmp_imag.data(), real_out, imag_out, false);
     }
 
     template <typename T> void FFTRecursive<T>::DeInterleave(const int len, T* data)
@@ -79,8 +79,8 @@ namespace learnfft
     }
 
     template <typename T>
-    void FFTRecursive<T>::FFTCoreRecursive(const int len, T* real_in, T* imag_in, T* real_out,
-                                           T* imag_out, bool forward)
+    void FFTRecursive<T>::FFTRadix2Recursive(const int len, T* real_in, T* imag_in, T* real_out,
+                                             T* imag_out, bool forward)
     {
         int f_sign = forward ? 1 : -1;
         if (len == 1)
@@ -103,10 +103,10 @@ namespace learnfft
             T* odd_out_real = real_out + half_len;
             T* odd_out_imag = imag_out + half_len;
 
-            FFTCoreRecursive(half_len, even_in_real, even_in_imag, even_out_real, even_out_imag,
-                             forward);
-            FFTCoreRecursive(half_len, odd_in_real, odd_in_imag, odd_out_real, odd_out_imag,
-                             forward);
+            FFTRadix2Recursive(half_len, even_in_real, even_in_imag, even_out_real, even_out_imag,
+                               forward);
+            FFTRadix2Recursive(half_len, odd_in_real, odd_in_imag, odd_out_real, odd_out_imag,
+                               forward);
             for (int k = 0; k < half_len; ++k)
             {
                 T odd_twiddle_real =
